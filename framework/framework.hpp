@@ -27,8 +27,3 @@ public:
 private:
     std::ofstream m_file;
 };
-
-int main() {
-    SVGFile svgFile;
-    svgFile.addLine(100,100,500,500);
-}
