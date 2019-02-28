@@ -11,12 +11,12 @@ vector<vector<char>> variations(const vector<char> &in, unsigned k) {
     vector<vector<char>> output;
     if (k == 1) {
         for (char c : in) {
-            output.emplace_back({c});
+            output.emplace_back(vector<char>({c}));
         }
         return output;
     }
 
-    for (unsigned i = 0; i < in.size(); ++i) {
+    for (size_t i = 0; i < in.size(); ++i) {
         auto copy = in;
         auto erased = copy[i];
         copy.erase(copy.begin()+i);
@@ -38,7 +38,7 @@ vector<vector<char>> permutations(const vector<char> &in) {
         return {in};
     }
 
-    for (unsigned i = 0; i < in.size(); ++i) {
+    for (size_t i = 0; i < in.size(); ++i) {
         auto copy = in;
         auto erased = copy[i];
         copy.erase(copy.begin()+i);
@@ -61,11 +61,11 @@ int main() {
         cout << endl;
     }*/
 
-    auto var = variations({'A', 'B', 'C', 'D', 'E'}, 3);
+    /*auto var = variations({'A', 'B', 'C', 'D', 'E'}, 2);
     for (auto &item : var) {
         for (char c :item) {cout << c;}
         cout << endl;
-    }
+    }*/
 
     return 0;
 }

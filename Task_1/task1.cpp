@@ -9,7 +9,7 @@ using namespace svg;
 
 auto getDivisorCount(unsigned number) {
     unsigned currentDivCount = 0;
-    for (unsigned divisor = 1; divisor < number; ++divisor) {
+    for (size_t divisor = 1; divisor < number; ++divisor) {
         if (number % divisor == 0) {
             currentDivCount++;
         }
@@ -22,7 +22,7 @@ auto maxDivisors(unsigned input) {
     unsigned maxDivCount = 0;
     unsigned currentDivCount = 0;
 
-    for (unsigned number = 0; number < input; ++number) {
+    for (size_t number = 0; number < input; ++number) {
         currentDivCount = getDivisorCount(number);
 
         if (currentDivCount > maxDivCount) {
@@ -39,9 +39,9 @@ auto maxDivisors(unsigned input) {
 }
 
 auto isThreeSquaresSummable(unsigned number) {
-    for (unsigned i = 1; i < sqrt(number); ++i) {
-        for (unsigned j = 1; j < sqrt(number); ++j) {
-            for (unsigned k = 1; k < sqrt(number); ++k) {
+    for (size_t i = 1; i < sqrt(number); ++i) {
+        for (size_t j = 1; j < sqrt(number); ++j) {
+            for (size_t k = 1; k < sqrt(number); ++k) {
                 if (number < i*i + j*j + k*k) break;
                 if (number == i*i + j*j + k*k) return true;
             }
@@ -54,7 +54,7 @@ auto isThreeSquaresSummable(unsigned number) {
 auto threeSquaresSum(unsigned input) {
     std::vector<unsigned> output;
 
-    for (unsigned number = 1; number < input; ++number) {
+    for (size_t number = 1; number < input; ++number) {
         if (!isThreeSquaresSummable(number))
             output.push_back(number);
     }
@@ -80,7 +80,7 @@ auto maxStepsCollatzSequence(unsigned input) {
     unsigned currentSteps = 0;
     std::vector<unsigned> maxStepsNumbers;
 
-    for (unsigned i = 1; i < input; ++i) {
+    for (size_t i = 1; i < input; ++i) {
         currentSteps = getCollatzSteps(i);
 
         if (currentSteps > maxSteps) {
@@ -94,6 +94,56 @@ auto maxStepsCollatzSequence(unsigned input) {
 
     maxStepsNumbers.push_back(maxSteps);
     return maxStepsNumbers;
+}
+
+bool isPrime(unsigned num) {
+    for (size_t i = 2; i <= sqrt(num); ++i) {
+        if (num % i == 0) return false;
+    }
+    return true;
+}
+
+bool containsDigitK(unsigned n, unsigned k) {
+    if (n % 10 == k) return true;
+    if (n < 10) return false;
+    return containsDigitK(n / 10, k);
+}
+
+auto nonThreePrimeSum(unsigned num) {
+    unsigned outputSum = 0;
+    for (size_t i = 2; i < num; ++i) {
+        if (isPrime(i) && !containsDigitK(i, 3)) {
+            outputSum += i;
+        }
+    }
+    return outputSum;
+}
+
+unsigned gcdFast(unsigned a, unsigned b) {
+    if (a % b == 0) return b;
+    return gcdFast(b, a % b);
+}
+
+unsigned gcdSlow(unsigned a, unsigned b) {
+    if (a < b) {
+        auto tmp = a;
+        a = b;
+        b = tmp;
+    }
+
+    if (a - b == 0) return b;
+    return gcdSlow(a - b, b);
+}
+
+unsigned fibonacciWithGcd(unsigned threshold) {
+    unsigned current = 0, last = 1, before_last = 1;
+
+    while (current < threshold) {
+        current = last + before_last + gcdFast(last, before_last);
+        before_last = last;
+        last = current;
+    }
+    return current;
 }
 
 void drawLadder(Point A, Point B, Point C, Point D, SVGFile& svgFile, double frequency = 0) {
@@ -113,7 +163,7 @@ void drawLadder(Point A, Point B, Point C, Point D, SVGFile& svgFile, double fre
 }
 
 void drawStar(SVGFile& svgFile, unsigned starPoints, double frequency = 0) {
-    for (unsigned i = 0; i < starPoints; ++i) {
+    for (size_t i = 0; i < starPoints; ++i) {
         Point A = {cos(2*M_PI/starPoints * i), sin(2*M_PI/starPoints * i)};
         Point B = {cos(2*M_PI/starPoints * (i+1)), sin(2*M_PI/starPoints * (i+1))};
         drawLadder({0.0, 0.0}, A, B, {0.0,0.0}, svgFile, frequency);
@@ -125,7 +175,7 @@ void generateUlamsSpiral(SVGFile& svgFile, unsigned n, unsigned pixelRadius, dou
     Point B = {1,0};
     svgFile.addLine({A.X*spacing, A.Y*spacing}, {B.X*spacing, B.Y*spacing}, true);
     A = B;
-    for (unsigned i = 2; i < n; ++i) {
+    for (size_t i = 2; i < n; ++i) {
         unsigned checkCount = 0;
         if ((A.X >= A.Y+1) && (A.Y > -A.X)) {B = {B.X, B.Y-1}; ++checkCount;}
         if ((A.Y <= -A.X) && (A.X > A.Y)) {B = {B.X-1, B.Y}; ++checkCount;}
@@ -135,9 +185,15 @@ void generateUlamsSpiral(SVGFile& svgFile, unsigned n, unsigned pixelRadius, dou
         assert(checkCount == 1);
 
         svgFile.addLine({A.X*spacing, A.Y*spacing}, {B.X*spacing, B.Y*spacing}, true);
-        if (i % 19 == 0) {
+
+        /*if (i % 19 == 0) {
+            svgFile.addCircle({A.X * spacing, A.Y * spacing}, pixelRadius, true, true);
+        }*/
+
+        if (isPrime(i)) {
             svgFile.addCircle({A.X * spacing, A.Y * spacing}, pixelRadius, true, true);
         }
+
         A = B;
     }
 }
@@ -160,9 +216,16 @@ int main() {
         std::cout << num << std::endl;
     }*/
 
+    //std::cout << nonThreePrimeSum(1000);
+
+    //std::cout << gcdFast(1234321, 8888) << " " << gcdFast(8888, 1234321) << std::endl;
+    //std::cout << gcdSlow(1234321, 8888) << " " << gcdSlow(8888, 1234321) << std::endl;
+
+    std::cout << fibonacciWithGcd(1000000);
+
     /*cv::Mat picture(1000, 1000, CV_16UC3, cv::Scalar(52000, 52000, 52000));
-    for (unsigned i = 0; i < picture.cols; ++i) {
-        for (unsigned j = 0; j < picture.rows; ++j) {
+    for (size_t i = 0; i < picture.cols; ++i) {
+        for (size_t j = 0; j < picture.rows; ++j) {
             picture.at<cv::Vec3w>(j,i) = cv::Vec3w(j*65535/1000, 0, i*65535/1000);
         }
     }
@@ -173,10 +236,9 @@ int main() {
     drawStar(svgFile, 20, 0.05);
     */
 
-    SVGFile svgFile("task1C.svg", 1000, 1000);
-    //svgFile.addCircle({0.5, 0.5}, 50, true, true);
-    //svgFile.addLine({0, 0.1}, {0.1, 0.5}, true);
-    generateUlamsSpiral(svgFile, 10000, 3);
+    /*SVGFile svgFile("task1C.svg", 1000, 1000);
+    generateUlamsSpiral(svgFile, 10000, 3);*/
+
 
 
     return 0;
