@@ -1,7 +1,6 @@
 
 #include <vector>
-#include <iostream>
-#include <assert.h>
+#include <cassert>
 
 using namespace std;
 

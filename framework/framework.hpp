@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cmath>
 
 namespace svg {
 
@@ -80,4 +81,49 @@ namespace svg {
     private:
         std::ofstream m_file;
     };
+
+    class Turtle {
+    public:
+        Turtle(const std::string &filename) :
+                m_file(filename),
+                m_pos{m_file.m_width/2, m_file.m_height/2} {}
+
+        Turtle(const std::string &filename, float height, float width) :
+                m_file(filename, height, width),
+                m_pos{width/2, height/2} {}
+
+        void forward(float len) {
+            double radDegree = toRad(m_degree);
+            Point newPos = m_pos + Vector{cos(radDegree), -sin(radDegree)} * len;
+            if (m_drawing) m_file.addLine(m_pos, newPos);
+            m_pos = newPos;
+        }
+
+        void back(float len) {
+            forward(-len);
+        }
+
+        void left(float deg) {
+            m_degree += deg;
+        }
+
+        void right(double deg) {
+            left(-deg);
+        }
+
+        void drawing(bool draw) {
+            m_drawing = draw;
+        }
+
+    private:
+        double toRad(double degrees) {return M_PI/180 * degrees;}
+
+        SVGFile m_file;
+        Point m_pos;
+        double m_degree = 0.0;
+        bool m_drawing = true;
+    };
 };
+
+//TODO work with doubles, not floats
+//TODO possibly add lines at the end
