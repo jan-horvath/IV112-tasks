@@ -119,12 +119,12 @@ auto nonThreePrimeSum(unsigned num) {
     return outputSum;
 }
 
-unsigned gcdFast(unsigned a, unsigned b) {
+unsigned gcdFast(unsigned a, unsigned b, unsigned &steps) {
     if (a % b == 0) return b;
-    return gcdFast(b, a % b);
+    return gcdFast(b, a % b, ++steps);
 }
 
-unsigned gcdSlow(unsigned a, unsigned b) {
+unsigned gcdSlow(unsigned a, unsigned b, unsigned &steps) {
     if (a < b) {
         auto tmp = a;
         a = b;
@@ -132,14 +132,15 @@ unsigned gcdSlow(unsigned a, unsigned b) {
     }
 
     if (a - b == 0) return b;
-    return gcdSlow(a - b, b);
+    return gcdSlow(a - b, b, ++steps);
 }
 
 unsigned fibonacciWithGcd(unsigned threshold) {
     unsigned current = 0, last = 1, before_last = 1;
+    unsigned steps = 0;
 
     while (current < threshold) {
-        current = last + before_last + gcdFast(last, before_last);
+        current = last + before_last + gcdFast(last, before_last, steps);
         before_last = last;
         last = current;
     }
@@ -199,6 +200,30 @@ void generateUlamsSpiral(SVGFile& svgFile, unsigned n, unsigned pixelRadius, dou
 }
 
 
+void gcdViz(unsigned upto, bool fast = true) {
+    unsigned steps = 0;
+    const unsigned MAX_COL = 65535;
+    cv::Mat gcdGraph(upto, upto, CV_16UC3, cv::Scalar(MAX_COL, MAX_COL, MAX_COL));
+
+    unsigned STEP_COL_RATIO = MAX_COL/sqrt(upto);
+    if (fast) STEP_COL_RATIO *= 10;
+
+    for (unsigned j = 1; j < upto; ++j) {
+        for (unsigned i = 1; i <= j; ++i) {
+            if (fast) gcdFast(j, i, steps);
+            else gcdSlow(i, j, steps);
+
+            unsigned colour = sqrt(steps) * STEP_COL_RATIO;
+            gcdGraph.at<cv::Vec3w>(i, j) = cv::Vec3w(MAX_COL - colour, MAX_COL - colour, MAX_COL);
+            gcdGraph.at<cv::Vec3w>(j, i) = cv::Vec3w(MAX_COL - colour, MAX_COL - colour, MAX_COL);
+            steps = 0;
+        }
+    }
+    if (fast) cv::imwrite("task1D_fast.png", gcdGraph);
+    else cv::imwrite("task1D_slow.png", gcdGraph);
+}
+
+
 int main() {
     /*auto maxDivisorsVector = maxDivisors(10000);
     for (auto number : maxDivisorsVector) {
@@ -221,7 +246,7 @@ int main() {
     //std::cout << gcdFast(1234321, 8888) << " " << gcdFast(8888, 1234321) << std::endl;
     //std::cout << gcdSlow(1234321, 8888) << " " << gcdSlow(8888, 1234321) << std::endl;
 
-    std::cout << fibonacciWithGcd(1000000);
+    //std::cout << fibonacciWithGcd(1000000);
 
     /*cv::Mat picture(1000, 1000, CV_16UC3, cv::Scalar(52000, 52000, 52000));
     for (size_t i = 0; i < picture.cols; ++i) {
@@ -238,6 +263,16 @@ int main() {
 
     /*SVGFile svgFile("task1C.svg", 1000, 1000);
     generateUlamsSpiral(svgFile, 10000, 3);*/
+
+
+    /*unsigned s = 1;
+    gcdFast(1, 423, s);
+    std::cout << s << std::endl;
+    s = 0;
+    gcdSlow(1, 423, s);
+    std::cout << s << std::endl;*/
+    gcdViz(1200);
+    gcdViz(1200, false);
 
 
 

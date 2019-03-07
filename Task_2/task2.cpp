@@ -19,6 +19,7 @@ vector<vector<char>> variations(const vector<char> &in, unsigned k, bool repetit
     for (size_t i = 0; i < in.size(); ++i) {
         auto copy = in;
         auto erased = copy[i];
+
         if (!repetition) {copy.erase(copy.begin()+i);}
 
         auto toAppend = variations(copy, k-1);
@@ -38,13 +39,16 @@ vector<vector<char>> permutations(const vector<char> &in) {
 
 vector<vector<char>> combinations(const vector<char> &input, unsigned k, bool repetition = false) {
     if (!repetition && input.size() == k) {return {input};}
-    if (repetition && input.empty()) {return {};}
     if (k == 0) {return {{}};}
 
-    vector<vector<char>> merged;
-    unsigned maxIterations = repetition ? k : 2;
+    if (repetition && input.size() == 1) {
+        return vector<vector<char>>({vector<char>(k, input.front())});
+    }
 
-    for (size_t i = 0; i < maxIterations; ++i) {
+    vector<vector<char>> merged;
+    unsigned maxIterations = repetition ? k : 1;
+
+    for (size_t i = 0; i <= maxIterations; ++i) {
         auto include_i_times = combinations({input.begin()+1, input.end()}, k-i, repetition);
 
         for (auto& combination : include_i_times) {
@@ -54,14 +58,9 @@ vector<vector<char>> combinations(const vector<char> &input, unsigned k, bool re
         }
         merged.insert(merged.end(), include_i_times.begin(), include_i_times.end());
     }
-    /*auto includeFirst = combinations({input.begin()+1, input.end()}, k-1, repetition);
-    auto excludeFirst = combinations({input.begin()+1, input.end()}, k, repetition);
-
-    merged = includeFirst;
-    merged.insert(merged.end(), excludeFirst.begin(), excludeFirst.end());*/
-
     return merged;
 }
+
 
 int main() {
     /*auto perms = permutations({'A', 'B', 'C', 'D'});
@@ -70,7 +69,8 @@ int main() {
         cout << endl;
     }*/
 
-    auto var = combinations({'A', 'B', 'C', 'D'}, 2, true);
+    auto var = combinations({'A', 'B', 'C', 'D'}, 4, true);
+
     for (auto &item : var) {
         for (char c :item) {cout << c;}
         cout << endl;
