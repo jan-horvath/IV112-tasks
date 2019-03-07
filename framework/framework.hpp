@@ -1,12 +1,19 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <vector>
 
 namespace svg {
 
     const std::string FILE_NAME = "output_image.svg";
     const float IMAGE_HEIGHT = 1080;
     const float IMAGE_WIDTH = 1920;
+
+    const std::vector<std::string> COLORS {
+        "red", "yellow", "green", "cyan", "blue", "pink",
+        "tomato", "greenyelow", "turquoise", "dodgerblue", "purple", "mediumvioletred",
+        "darkorange", "lightgreen", "aquamarine", "royalblue", "mediumpurple", "hotpink"
+    };
 
     struct Vector {
         double X;
@@ -43,7 +50,14 @@ namespace svg {
                    << "<rect width=\"100%\" height=\"100%\" fill=\"white\"/>\n";
         }
 
-        void addLine(Point a, Point b, bool upscale = false) {
+        /**
+         *
+         * @param a - Start point
+         * @param b - End point
+         * @param col - Color
+         * @param upscale - True means, that point coordinates are in interval <-1, 1> and need to be upscaled for SVG
+         */
+        void addLine(Point a, Point b, const std::string& col = COLORS[0], bool upscale = false) {
             if (upscale) {
                 a.X = m_width / 2 + a.X * m_width / 2;
                 b.X = m_width / 2 + b.X * m_width / 2;
@@ -53,10 +67,19 @@ namespace svg {
             }
             m_file << "   <line x1=\"" << a.X << "\" y1=\"" << a.Y
                    << "\" x2=\"" << b.X << "\" y2=\"" << b.Y
-                   << "\" style=\"stroke:rgb(255,0,0);stroke-width:1\" />" << std::endl;
+                   << "\" stroke=\"" << col << "\" />" << std::endl;
         }
 
-        void addCircle(Point c, double rad, bool fill, bool upscale = false) {
+        /**
+         *
+         * @param c - center
+         * @param rad - radius
+         * @param fill - whether the circle should be filled with colour
+         * @param col - Colour for circle and fill
+         * @param upscale - True means, that point coordinates are in interval <-1, 1>, radius is in interval <0, 2>
+         * and need to be upscaled for SVG
+         */
+        void addCircle(Point c, double rad, bool fill, const std::string& col = COLORS[0], bool upscale = false) {
             if (upscale) {
                 c.X = m_width / 2 + c.X * m_width / 2;
                 c.Y = m_height / 2 + c.Y * m_height / 2;
@@ -64,11 +87,37 @@ namespace svg {
 
             m_file << "   <circle cx=\"" << c.X << "\" cy=\"" << c.Y
                    << "\" r=\"" << rad
-                   << "\" stroke=\"red\" stroke-width=\"1\" ";
+                   << "\" stroke=\"" << col << "\" ";
             if (fill) {
-                m_file << "fill=\"red\"";
+                m_file << "fill=\"" << col << "\" ";
             }
             m_file << "/>" << std::endl;
+        }
+
+        /**
+         * Creates a filled rectangle
+         * @param c - center
+         * @param width - width of rectangle
+         * @param height - height of rectangle
+         * @param upscale - True means, that point coordinates are in interval <-1, 1>, width and height are
+         * in interval <0, 2> and need to be upscaled for SVG
+         */
+        void addRect(Point c, double width, double height, const std::string& col = COLORS[0], bool upscale = false) {
+            if (upscale) {
+                width *= m_width / 2;
+                height *= m_height / 2;
+                c.X = m_width / 2 + c.X * m_width / 2 - width / 2;
+                c.Y = m_height / 2 + c.Y * m_height /2 - height / 2;
+            } else {
+                c.X -= width / 2;
+                c.Y -= height / 2;
+            }
+
+            m_file  << "   <rect x=\"" << c.X << "\" y=\"" << c.Y
+                    << "\" width=\"" << width
+                    << "\" height=\"" << height
+                    << "\" fill=\"" << col
+                    << "\" />" << std::endl;
         }
 
         ~SVGFile() {

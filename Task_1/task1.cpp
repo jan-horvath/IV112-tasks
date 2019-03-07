@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <cmath>
+#include <cassert>
 
 using namespace svg;
 
@@ -148,19 +149,19 @@ unsigned fibonacciWithGcd(unsigned threshold) {
 }
 
 void drawLadder(Point A, Point B, Point C, Point D, SVGFile& svgFile, double frequency = 0) {
-    svgFile.addLine(A, B, true);
-    svgFile.addLine(C, D, true);
+    svgFile.addLine(A, B, COLORS[0], true);
+    svgFile.addLine(C, D, COLORS[0], true);
 
     double lambda = 0.0;
     while (lambda < 1.0) {
-        svgFile.addLine(A + ((B - A) * lambda), C + ((D - C) * lambda), true);
+        svgFile.addLine(A + ((B - A) * lambda), C + ((D - C) * lambda), COLORS[0], true);
         if (frequency != 0) {
             lambda += frequency;
         } else {
             //TODO add random increment
         }
     }
-    svgFile.addLine(B, D, true);
+    svgFile.addLine(B, D, COLORS[0], true);
 }
 
 void drawStar(SVGFile& svgFile, unsigned starPoints, double frequency = 0) {
@@ -174,7 +175,7 @@ void drawStar(SVGFile& svgFile, unsigned starPoints, double frequency = 0) {
 void generateUlamsSpiral(SVGFile& svgFile, unsigned n, unsigned pixelRadius, double spacing = 0.02) {
     Point A = {0,0};
     Point B = {1,0};
-    svgFile.addLine({A.X*spacing, A.Y*spacing}, {B.X*spacing, B.Y*spacing}, true);
+    svgFile.addLine({A.X*spacing, A.Y*spacing}, {B.X*spacing, B.Y*spacing}, COLORS[0], true);
     A = B;
     for (size_t i = 2; i < n; ++i) {
         unsigned checkCount = 0;
@@ -185,14 +186,14 @@ void generateUlamsSpiral(SVGFile& svgFile, unsigned n, unsigned pixelRadius, dou
 
         assert(checkCount == 1);
 
-        svgFile.addLine({A.X*spacing, A.Y*spacing}, {B.X*spacing, B.Y*spacing}, true);
+        svgFile.addLine({A.X*spacing, A.Y*spacing}, {B.X*spacing, B.Y*spacing}, COLORS[0], true);
 
         /*if (i % 19 == 0) {
             svgFile.addCircle({A.X * spacing, A.Y * spacing}, pixelRadius, true, true);
         }*/
 
         if (isPrime(i)) {
-            svgFile.addCircle({A.X * spacing, A.Y * spacing}, pixelRadius, true, true);
+            svgFile.addCircle({A.X * spacing, A.Y * spacing}, pixelRadius, true, COLORS[0], true);
         }
 
         A = B;
