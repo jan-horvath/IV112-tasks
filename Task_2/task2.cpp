@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include "../framework/framework.hpp"
+#include <chrono>
 
 using namespace std;
 using namespace svg;
@@ -65,23 +66,64 @@ vector<vector<char>> combinations(const vector<char> &input, unsigned k, bool re
 
 void drawPascalTriangle(SVGFile& file, unsigned rows, unsigned divisor) {
     vector<unsigned> row{1};
-    double blockSize = 0.01;
-    double centerY = blockSize * rows / 2.0;
-    double centerX = 0;
+    double blockSize = 0.007;
+    double centerY = -blockSize * rows / 2.0;
+    double centerX = 0.0;
     unsigned colorID = 0;
 
     for (size_t i = 0; i < rows; ++i) {
-        for (int j = row.size() - 2; j > 0; --j) {
-            row[j] = (row[j] + row[j-1]) % divisor;
+        for (int j = row.size() - 1; j >= 0; --j) {
+            if (j != row.size()-1 && j != 0) {
+                row[j] = (row[j] + row[j-1]) % divisor;
+            }
             colorID = row[j] % COLORS.size();
             file.addRect({centerX, centerY}, blockSize, blockSize, COLORS[colorID], true);
             centerX += blockSize;
         }
+        row.push_back(1);
         centerX = -((row.size() - 1) / 2.0) * blockSize;
         centerY += blockSize;
-        row.push_back(1);
     }
 }
+
+long double leibniz(long timeLimit) {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto workingTime = (chrono::high_resolution_clock::now() - start) / chrono::milliseconds(1);
+
+    long double PI = 1;
+
+    for (size_t i = 0; timeLimit > workingTime; ++i) {
+        PI = PI - 1.0/(4*i+3) + 1.0/(4*i+5);
+        workingTime = (chrono::high_resolution_clock::now() - start) / chrono::milliseconds(1);
+    }
+    return PI * 4;
+}
+
+long double archimedes_polygon(double timeLimit) {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto workingTime = (chrono::high_resolution_clock::now() - start) / chrono::nanoseconds(1);
+
+    long double PI = 0;
+    long double polygonSideLength = 1.0;
+    unsigned long long polygon_N = 6;
+    cout << polygonSideLength << endl;
+
+    for (unsigned i = 0; i < 30; ++i) {
+        long double B = 1.0 - sqrt(1.0 - polygonSideLength/2.0 * polygonSideLength/2.0);
+        polygonSideLength = sqrt(B * B + polygonSideLength/2 * polygonSideLength/2);
+        polygon_N = 2 * polygon_N;
+        PI = polygon_N * polygonSideLength;
+
+        workingTime = (chrono::high_resolution_clock::now() - start) / chrono::nanoseconds(1);
+    }
+    cout << "Working time = " << workingTime << endl;
+    return PI/2;
+}
+
+long double monte_carlo(double timeLimit) {
+
+}
+
 
 
 int main() {
@@ -98,8 +140,20 @@ int main() {
         cout << endl;
     }*/
 
-    SVGFile file("task2B.svg", 1000, 1000);
-    drawPascalTriangle(file, 10, 5);
+    /*
+    SVGFile file("task2B.svg", 1400, 1400);
+    drawPascalTriangle(file, 280, 2);
+    */
+
+    cout.precision(25);
+    const long double REAL_PI = 3.1415926535897932;
+    cout << REAL_PI << endl;
+
+    long double pi_liebniz = leibniz(500);
+    cout << pi_liebniz - REAL_PI << endl;
+
+    long double pi_archimedes = archimedes(0.0000000000000001);
+    cout << pi_archimedes - REAL_PI << endl;
 
     return 0;
 }
