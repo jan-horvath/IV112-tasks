@@ -10,7 +10,7 @@ namespace svg {
     const float IMAGE_WIDTH = 1920;
 
     const std::vector<std::string> COLORS {
-        "red", "yellow", "green", "cyan", "blue", "pink",
+        "black", "red", "yellow", "green", "cyan", "blue", "pink",
         "tomato", "greenyelow", "turquoise", "dodgerblue", "purple", "mediumvioletred",
         "darkorange", "lightgreen", "aquamarine", "royalblue", "mediumpurple", "hotpink"
     };
