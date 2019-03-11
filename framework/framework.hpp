@@ -6,8 +6,8 @@
 namespace svg {
 
     const std::string FILE_NAME = "output_image.svg";
-    const float IMAGE_HEIGHT = 1080;
-    const float IMAGE_WIDTH = 1920;
+    const double IMAGE_HEIGHT = 1080;
+    const double IMAGE_WIDTH = 1920;
 
     const std::vector<std::string> COLORS {
         "black", "red", "yellow", "green", "cyan", "blue", "pink",
@@ -43,7 +43,7 @@ namespace svg {
 
         SVGFile(const std::string &file_name) : SVGFile(file_name, IMAGE_HEIGHT, IMAGE_WIDTH) {}
 
-        SVGFile(const std::string &file_name, float height, float width) :
+        SVGFile(const std::string &file_name, double height, double width) :
         m_file(file_name), m_height(height), m_width(width) {
             m_file << "<html>\n<body>\n\n"
                    << "<svg height=\"" << height << "\" width=\"" << width << "\">\n"
@@ -124,8 +124,8 @@ namespace svg {
             m_file << "</svg>\n\n</body>\n</html>";
         }
 
-        const float m_height;
-        const float m_width;
+        const double m_height;
+        const double m_width;
 
     private:
         std::ofstream m_file;
@@ -137,22 +137,22 @@ namespace svg {
                 m_file(filename),
                 m_pos{m_file.m_width/2, m_file.m_height/2} {}
 
-        Turtle(const std::string &filename, float height, float width) :
+        Turtle(const std::string &filename, double height, double width) :
                 m_file(filename, height, width),
                 m_pos{width/2, height/2} {}
 
-        void forward(float len) {
+        void forward(double len) {
             double radDegree = toRad(m_degree);
             Point newPos = m_pos + Vector{cos(radDegree), -sin(radDegree)} * len;
             if (m_drawing) m_file.addLine(m_pos, newPos);
             m_pos = newPos;
         }
 
-        void back(float len) {
+        void back(double len) {
             forward(-len);
         }
 
-        void left(float deg) {
+        void left(double deg) {
             m_degree += deg;
         }
 
@@ -174,5 +174,4 @@ namespace svg {
     };
 };
 
-//TODO work with doubles, not floats
 //TODO possibly add lines at the end
