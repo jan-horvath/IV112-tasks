@@ -45,7 +45,7 @@ int main() {
     drawCircleImp(picture, 200, 300, 100, false);
     drawCircleImp(picture, 800, 300, 100, true);
 
-    equaliteralTriangle(picture);
+//    equaliteralTriangle(picture);
 
     cv::imwrite("task4A1.png", picture);
 

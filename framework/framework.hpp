@@ -152,12 +152,15 @@ namespace svg {
             forward(-len);
         }
 
-        void left(double deg) {
-            m_degree += deg;
+        void left(double angle, bool radians = false) {
+            if (radians) {
+                angle = toDeg(angle);
+            }
+            m_degree += angle;
         }
 
-        void right(double deg) {
-            left(-deg);
+        void right(double angle, bool radians = false) {
+            left(-angle, radians);
         }
 
         void drawing(bool draw) {
@@ -166,6 +169,7 @@ namespace svg {
 
     private:
         double toRad(double degrees) {return M_PI/180 * degrees;}
+        double toDeg(double radians) { return 180/M_PI * radians;}
 
         SVGFile m_file;
         Point m_pos;
