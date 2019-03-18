@@ -135,23 +135,25 @@ void recBush(Turtle& t, double length, unsigned depth, unsigned seed) {
 int main() {
 
     //TASK A
-    /*Turtle tA("task3A.svg", 1000, 1000);
+    Turtle tA("task3A.svg", 1000, 1000);
     for (unsigned i = 1; i < 4; ++i) {
-        drawPolygon(t, 3*i, 400);
+        drawPolygon(tA, 3*i, 400);
     }
-    t.left(90);
+    tA.left(90);
 
-    drawStar(t, 5, 50);
-    drawStar(t, 5, 200);*/
+    drawStar(tA, 5, 50);
+    drawStar(tA, 5, 200);
 
     //TASK B
-    /*Turtle A("task3B-A1.svg", 1000, 1000);
+    Turtle A("task3B-A1.svg", 1000, 1000);
     SVGFile file("task3B-A2.svg", 1000, 1000);
     drawPentagramR(A, 400);
     drawPentagramA(file, 400);
 
-    Turtle B("task3B-B", 1000, 1000);
-    recursiveSquare(B, 150, 50, 1.01);
+    Turtle B1("task3B-B1", 1000, 1000);
+    recursiveSquare(B1, 150, 50, 1.01);
+    Turtle B2("task3B-B2", 1000, 1000);
+    recursiveSquare(B2, 50, 600, 0.1);
 
     SVGFile C("task3B-C.svg", 1000, 1000);
     circularLattice(C, 400, 15);
@@ -164,7 +166,7 @@ int main() {
 
     Turtle E("task3B-E.svg", 1000, 1000);
     E.left(90);
-    polygonBowl(E, 20, 200);*/
+    polygonBowl(E, 20, 200);
 
     //TASK C
     Turtle tC("task3C-A.svg", 1000, 1000);
