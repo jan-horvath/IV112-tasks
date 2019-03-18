@@ -22,7 +22,13 @@ namespace svg {
         Vector operator*(double n) {
             return {this->X * n, this->Y * n};
         }
+
+        Vector norm() {
+            double length = sqrt(X*X + Y*Y);
+            return {X/length, Y/length};
+        }
     };
+
 
     struct Point {
         double X;
@@ -34,6 +40,15 @@ namespace svg {
 
         Point operator+(const Vector& v) const {
             return {this->X + v.X, this->Y + v.Y};
+        }
+    };
+
+    struct LineSegment {
+        Point P1;
+        Point P2;
+
+        Vector getVec() {
+            return P2 - P1;
         }
     };
 

@@ -249,29 +249,29 @@ int main() {
 
     //std::cout << fibonacciWithGcd(1000000);
 
-    /*cv::Mat picture(1000, 1000, CV_16UC3, cv::Scalar(52000, 52000, 52000));
-    for (size_t i = 0; i < picture.cols; ++i) {
-        for (size_t j = 0; j < picture.rows; ++j) {
-            picture.at<cv::Vec3w>(j,i) = cv::Vec3w(j*65535/1000, 0, i*65535/1000);
+    cv::Mat Bpng(1000, 1000, CV_16UC3, cv::Scalar(52000, 52000, 52000));
+    for (size_t i = 0; i < Bpng.cols; ++i) {
+        for (size_t j = 0; j < Bpng.rows; ++j) {
+            Bpng.at<cv::Vec3w>(j,i) = cv::Vec3w(j*65535/1000, 0, i*65535/1000);
         }
     }
-    cv::imwrite("task1B.png", picture);*/
-
-    /*
-    SVGFile svgFile("task1B.svg", 1000, 1000);
-    drawStar(svgFile, 20, 0.05);
-    */
-
-    /*SVGFile svgFile("task1C.svg", 1000, 1000);
-    generateUlamsSpiral(svgFile, 10000, 3);*/
+    cv::imwrite("task1B.png", Bpng);
 
 
-    /*unsigned s = 1;
-    gcdFast(1, 423, s);
+    SVGFile Bsvg("task1B.svg", 1000, 1000);
+    drawStar(Bsvg, 20, 0.05);
+
+
+    SVGFile C("task1C.svg", 1000, 1000);
+    generateUlamsSpiral(C, 10000, 3);
+
+
+    unsigned s = 1;
+    gcdFast(1, 500000, s);
     std::cout << s << std::endl;
     s = 0;
-    gcdSlow(1, 423, s);
-    std::cout << s << std::endl;*/
+    gcdSlow(1, 500000, s);
+    std::cout << s << std::endl;
     gcdViz(1200);
     gcdViz(1200, false);
 
