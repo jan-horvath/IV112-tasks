@@ -20,7 +20,7 @@ vector<LineSegment> generateLineSegments(SVGFile& file, unsigned lineCount, doub
 }
 
 Point detectIntersection(LineSegment a, LineSegment b) {
-    double X = ()
+    double X;
     /*
      * u=(cy.bx-ay.bx-cx.by+ax.by)/(dx.by-dy.bx)
         u=(bx(cy-ay) +by(ax-cx))/(dx.by-dy.bx) //tidied up slightly

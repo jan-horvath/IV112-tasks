@@ -132,8 +132,38 @@ void recBush(Turtle& t, double length, unsigned depth, unsigned seed) {
     t.back(length);
 }
 
-int main() {
 
+void kochRec(Turtle &t, double length, unsigned depth) {
+    if (depth == 0) {
+        t.forward(length);
+        return;
+    }
+    kochRec(t, length/3, depth-1);
+    t.left(60);
+    kochRec(t, length/3, depth-1);
+    t.right(120);
+    kochRec(t, length/3, depth-1);
+    t.left(60);
+    kochRec(t, length/3, depth-1);
+    //t.left(60);
+}
+
+void koch(Turtle& t, double radius, unsigned depth) {
+    t.drawing(false);
+    t.left(60);
+    t.forward(radius);
+    t.right(180-30);
+    t.drawing(true);
+
+    kochRec(t, 2 * radius * sin(M_PI/3), depth);
+    t.right(120);
+    kochRec(t, 2 * radius * sin(M_PI/3), depth);
+    t.right(120);
+    kochRec(t, 2* radius * sin(M_PI/3), depth);
+}
+
+int main() {
+    /*
     //TASK A
     Turtle tA("task3A.svg", 1000, 1000);
     for (unsigned i = 1; i < 4; ++i) {
@@ -169,13 +199,17 @@ int main() {
     polygonBowl(E, 20, 200);
 
     //TASK C
-    Turtle tC("task3C-A.svg", 1000, 1000);
-    tC.left(90);
-    tC.drawing(false);
-    tC.back(300);
-    tC.drawing(true);
-    recBush(tC, 120, 10, 11111111);
+    Turtle Ca("task3C-A.svg", 1000, 1000);
+    Ca.left(90);
+    Ca.drawing(false);
+    Ca.back(300);
+    Ca.drawing(true);
+    recBush(Ca, 120, 10, 11111111);
+    */
 
+    Turtle Cb("task3C-B.svg", 1000, 1000);
+    Cb.left(90);
+    koch(Cb, 400, 5);
 
     return 0;
 }
