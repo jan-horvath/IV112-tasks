@@ -58,11 +58,11 @@ namespace svg {
 
         SVGFile(const std::string &file_name) : SVGFile(file_name, IMAGE_HEIGHT, IMAGE_WIDTH) {}
 
-        SVGFile(const std::string &file_name, double height, double width) :
+        SVGFile(const std::string &file_name, double height, double width, const std::string &color = "white") :
         m_file(file_name), m_height(height), m_width(width) {
             m_file << "<html>\n<body>\n\n"
                    << "<svg height=\"" << height << "\" width=\"" << width << "\">\n"
-                   << "<rect width=\"100%\" height=\"100%\" fill=\"white\"/>\n";
+                   << "<rect width=\"100%\" height=\"100%\" fill=\"" << color << "\"/>\n";
         }
 
         /**
@@ -155,6 +155,9 @@ namespace svg {
         Turtle(const std::string &filename, double height, double width) :
                 m_file(filename, height, width),
                 m_pos{width/2, height/2} {}
+
+        Turtle(Turtle &) = delete;
+        void operator=(const Turtle&) = delete;
 
         void forward(double len) {
             double radDegree = toRad(m_degree);

@@ -145,7 +145,6 @@ void kochRec(Turtle &t, double length, unsigned depth) {
     kochRec(t, length/3, depth-1);
     t.left(60);
     kochRec(t, length/3, depth-1);
-    //t.left(60);
 }
 
 void koch(Turtle& t, double radius, unsigned depth) {
@@ -160,6 +159,149 @@ void koch(Turtle& t, double radius, unsigned depth) {
     kochRec(t, 2 * radius * sin(M_PI/3), depth);
     t.right(120);
     kochRec(t, 2* radius * sin(M_PI/3), depth);
+}
+
+void sierpinskiRec(Turtle &t, double radius, unsigned depth) {
+    drawPolygon(t, 3, radius);
+    t.drawing(false);
+
+    if (depth > 0) {
+        for (unsigned i = 0; i < 3; ++i) {
+            t.drawing(false);
+            t.back(radius);
+            sierpinskiRec(t, radius/2, depth - 1);
+            t.forward(radius);
+            t.left(120);
+        }
+    }
+}
+
+void sierpinski(Turtle &t, double radius, unsigned depth) {
+    drawPolygon(t, 3, radius);
+    t.drawing(false);
+    t.left(180);
+
+    if (depth > 0) {
+        sierpinskiRec(t, radius/2, depth - 1);
+    }
+    t.drawing(true);
+}
+
+/*void hilbert(Turtle &t, double sideLength, unsigned depth) {
+    t.drawing(false);
+    t.back(sideLength/2);
+    t.right(90);
+    t.back(sideLength/2);
+    t.left(90);
+}*/
+
+void polySnowflake(Turtle &t, unsigned polyDegree, double radius, unsigned depth) {
+    if (depth == 0) {
+        if (polyDegree % 2 == 0) {t.left(180.0/polyDegree);}
+        drawPolygon(t, polyDegree, radius);
+        if (polyDegree % 2 == 0) {t.right(180.0/polyDegree);}
+        return;
+    }
+
+    double polygonTriangleHeight = radius/(2+1.0/cos(M_PI/polyDegree));
+    double newRadius = radius - 2 * polygonTriangleHeight;
+
+    if (polyDegree % 2 == 1) {t.left(180.0/polyDegree);}
+    polySnowflake(t, polyDegree, newRadius, depth-1);
+    if (polyDegree % 2 == 1) {t.right(180.0/polyDegree);}
+    t.drawing(false);
+    for (unsigned i = 0; i < polyDegree; ++i) {
+        t.forward(2*polygonTriangleHeight);
+        polySnowflake(t, polyDegree, newRadius, depth-1);
+        t.drawing(false);
+        t.back(2*polygonTriangleHeight);
+        t.left(360.0/polyDegree);
+    }
+}
+
+void drawLadder(SVGFile& file, Point A, Point B, Point C, Point D, double frequency) {
+    file.addLine(A, B, COLORS[1]);
+    file.addLine(C, D, COLORS[1]);
+
+    double lambda = 0.0;
+    while (lambda < 1.0) {
+        file.addLine(A + ((B - A) * lambda), C + ((D - C) * lambda), COLORS[13]);
+        lambda += frequency;
+    }
+    file.addLine(B, D, COLORS[13]);
+}
+
+void drawHexaladder(SVGFile& file, Point center, double radius) {
+    for (unsigned i = 0; i < 6; ++i) {
+        Point A = {radius*cos(i*M_PI/3) + center.X, radius * sin(i*M_PI/3) + center.Y};
+        Point B = {radius*cos((i+1)*M_PI/3) + center.X, radius * sin((i+1)*M_PI/3) + center.Y};
+        Point C = {radius*cos((i+2)*M_PI/3) + center.X, radius * sin((i+2)*M_PI/3) + center.Y};
+        Point D = {radius*cos((i+3)*M_PI/3) + center.X, radius * sin((i+3)*M_PI/3) + center.Y};
+        drawLadder(file, A, B, C, D, 1.0/3);
+    }
+}
+
+void customFractal1(SVGFile& file, Point center, double radius, unsigned depth) {
+    if (depth == 0) {
+        drawHexaladder(file, center, radius);
+        return;
+    }
+
+    double centerRadius = sqrt(3) * 1.0/3 * radius;
+    customFractal1(file, center, radius/3, depth-1);
+    for (unsigned i = 0; i < 6; ++i) {
+        Point newCenter = {centerRadius*cos(i*M_PI/3 + M_PI/6) + center.X, centerRadius * sin(i*M_PI/3 + M_PI/6) + center.Y};
+        customFractal1(file, newCenter, radius/3, depth-1);
+    }
+}
+
+void customFractal2(Turtle &t, double length, unsigned depth) {
+    if (depth == 0) {
+        t.forward(length);
+        return;
+    }
+
+    double quarter = length/4;
+
+    customFractal2(t, 1.5*quarter - quarter/sqrt(2), depth-1);
+    t.left(45);
+    customFractal2(t, length/4, depth-1);
+    t.left(45);
+    customFractal2(t, length/4, depth-1);
+    t.right(45);
+    customFractal2(t, length/4, depth-1);
+    t.right(45);
+    customFractal2(t, length/4, depth-1);
+    t.right(180-45);
+    customFractal2(t, length/4, depth-1);
+    t.left(45);
+    customFractal2(t, length/4, depth-1);
+    t.left(45);
+    customFractal2(t, length/4, depth-1);
+    t.left(45);
+    customFractal2(t, 1.5*quarter - quarter/sqrt(2), depth-1);
+}
+
+void customFractal3(Turtle &t, double length, unsigned depth) {
+    if (depth == 0) {
+        t.forward(length);
+        return;
+    }
+
+    double quarter = length/4;
+
+    customFractal3(t, quarter, depth-1);
+    t.left(45);
+    customFractal3(t, quarter*sqrt(2), depth-1);
+    t.left(45);
+    customFractal3(t, quarter, depth-1);
+    t.right(180);
+    customFractal3(t, quarter, depth-1);
+    t.left(45);
+    customFractal3(t, quarter*sqrt(2), depth-1);
+    t.left(45);
+    customFractal3(t, quarter, depth-1);
+
 }
 
 int main() {
@@ -207,9 +349,43 @@ int main() {
     recBush(Ca, 120, 10, 11111111);
     */
 
-    Turtle Cb("task3C-B.svg", 1000, 1000);
+    /*Turtle Cb("task3C-B.svg", 1000, 1000);
     Cb.left(90);
-    koch(Cb, 400, 5);
+    koch(Cb, 400, 5);*/
+
+    /*Turtle Cc("task3C-C.svg", 1000, 1000);
+    Cc.drawing(false);
+    Cc.left(90);
+    Cc.back(100);
+    sierpinski(Cc, 500, 8);*/
+
+    /*Turtle Ce("task3C-E.svg", 1000, 1000);
+    polySnowflake(Ce, 8, 500, 3);*/
+
+    //SVGFile D1("task3D-1.svg", 1250, 1250, COLORS[0]);
+    //customFractal1(D1, {625, 625}, 725, 1);
+
+    /*Turtle D2("task3D-2.svg", 1000, 1000);
+    D2.drawing(false);
+    D2.back(500);
+    D2.left(90);
+    D2.back(400);
+    D2.right(90);
+    D2.drawing(true);
+    customFractal2(D2, 1000, 3);*/
+
+    Turtle D3("task3D-3.svg", 1000, 1000);
+    D3.drawing(false);
+    D3.back(450);
+    D3.left(90);
+    D3.back(450);
+    D3.right(90);
+    D3.drawing(true);
+    for (unsigned i = 0; i < 4; ++i) {
+        customFractal3(D3, 900, 4);
+        D3.left(90);
+    }
+
 
     return 0;
 }
