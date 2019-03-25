@@ -267,10 +267,10 @@ int main() {
 
 
     unsigned s = 1;
-    gcdFast(1, 500000, s);
+    gcdFast(1, 5000, s);
     std::cout << s << std::endl;
     s = 0;
-    gcdSlow(1, 500000, s);
+    gcdSlow(1, 5000, s);
     std::cout << s << std::endl;
     gcdViz(1200);
     gcdViz(1200, false);

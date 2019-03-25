@@ -61,8 +61,9 @@ namespace svg {
         SVGFile(const std::string &file_name, double height, double width, const std::string &color = "white") :
         m_file(file_name), m_height(height), m_width(width) {
             m_file << "<html>\n<body>\n\n"
-                   << "<svg height=\"" << height << "\" width=\"" << width << "\">\n"
-                   << "<rect width=\"100%\" height=\"100%\" fill=\"" << color << "\"/>\n";
+                   << "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink= \"http://www.w3.org/1999/xlink\" "
+                   << "viewBox=\"0 0 " << width << " " << height << "\">\n"
+                   << "<rect width=\"100%\" height=\"100%\" fill=\"white\"/>\n";
         }
 
         /**
