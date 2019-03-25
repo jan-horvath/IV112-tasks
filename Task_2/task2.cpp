@@ -12,8 +12,6 @@ using namespace svg;
 const long double REAL_PI = 3.1415926535897932;
 
 vector<vector<char>> variations(const vector<char> &in, unsigned k, bool repetition = false) {
-    assert(k <= in.size());
-
     vector<vector<char>> output;
     if (k == 1) {
         for (char c : in) {
@@ -69,7 +67,7 @@ vector<vector<char>> combinations(const vector<char> &input, unsigned k, bool re
 
 void drawPascalTriangle(SVGFile& file, unsigned rows, unsigned divisor) {
     vector<unsigned> row{1};
-    double blockSize = 0.007;
+    double blockSize = 0.9*2/rows;
     double centerY = -blockSize * rows / 2.0;
     double centerX = 0.0;
     unsigned colorID = 0;
@@ -200,15 +198,15 @@ int main() {
         cout << endl;
     }*/
 
-    /*
-    SVGFile file("task2B.svg", 1400, 1400);
-    drawPascalTriangle(file, 280, 2);
-    */
+
+    //SVGFile file("task2B.svg", 500, 500);
+    //drawPascalTriangle(file, 250, 5);
+
 
     /*cout.precision(25);
     leibniz(500);
     archimedes_polygon(25);
-    monte_carlo(1000);*/
+    monte_carlo(500);*/
 
 
     auto start = std::chrono::high_resolution_clock::now();
