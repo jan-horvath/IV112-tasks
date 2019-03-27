@@ -169,7 +169,6 @@ void fillPolygon(Mat &pic) {
         (pic.at<Vec3w>(pic.rows-1,pic.cols-1).val[0] == 0)) {
         invertColors(pic);
     }
-
 }
 
 void polygon(Mat &pic, const std::vector<Point2i> &points) {
@@ -178,6 +177,51 @@ void polygon(Mat &pic, const std::vector<Point2i> &points) {
     }
     line(pic, points.back().x, points.back().y, points[0].x, points[0].y);
     fillPolygon(pic);
+}
+
+void swapColor(Vec3w &color) {
+    if (color.val[0] == 0) {
+        color = WHITE;
+    } else {
+        color = BLACK;
+    }
+}
+
+void optical1(Mat &pic, unsigned squareSize, unsigned circleParam) {
+    unsigned centerX = pic.cols/2;
+    unsigned centerY = pic.rows/2;
+    Vec3w color;
+
+    for (unsigned x = 0; x < pic.cols; ++x) {
+        for (unsigned y = 0; y < pic.rows; ++y) {
+            color = WHITE;
+            if ((((x / squareSize) % 2) + ((y / squareSize) % 2)) == 1) {
+                swapColor(color);
+            }
+            if (lround(distance(x, y, centerX, centerY) / circleParam) % 2 == 1) {
+                swapColor(color);
+            }
+            pic.at<Vec3w>(y, x) = color;
+        }
+    }
+}
+
+void optical2(Mat &pic, double period, unsigned squareParam) {
+    double centerX = pic.cols/2;
+    double centerY = pic.rows/2;
+    double dist;
+    double colorIntensity;
+
+    for (unsigned x = 0; x < pic.cols; ++x) {
+        for (unsigned y = 0; y < pic.rows; ++y) {
+            dist = distance(x, y, centerX, centerY);
+            colorIntensity = ((cos(dist/period * 2*M_PI) + 1)/2);
+            if ((lround(max(abs(x-centerX), abs(y-centerY))) / squareParam) % 2 == 1) {
+                colorIntensity = 1- colorIntensity;
+            }
+            pic.at<Vec3w>(y, x) = Vec3w(MAX_COL*colorIntensity, MAX_COL*colorIntensity, MAX_COL*colorIntensity);
+        }
+    }
 }
 
 
@@ -191,10 +235,18 @@ int main() {
     ellipse(picture, 400, 600, 600, 400, 400);
     cv::imwrite("task4A.png", picture);*/
 
-    cv::Mat picture2(500, 500, CV_16UC3, WHITE);
+    /*cv::Mat picture2(500, 500, CV_16UC3, WHITE);
     polygon(picture2, {{50, 50}, {250, 300}, {450, 50}, {350, 250},
                        {450, 450}, {250, 350}, {50, 450}, {150, 250}});
-    imwrite("task4B.png", picture2);
+    imwrite("task4B.png", picture2);*/
+
+    cv::Mat picture3A(1000, 1000, CV_16UC3, WHITE);
+    optical1(picture3A, 40, 125);
+    imwrite("task4C-A.png", picture3A);
+
+    cv::Mat picture3B(1000, 1000, CV_16UC3, WHITE);
+    optical2(picture3B, 75, 400);
+    imwrite("task4C-B.png", picture3B);
 
 
 
