@@ -4,39 +4,40 @@
 using namespace std;
 using namespace cv;
 
+const auto MAX_COL_8BIT = 255;
 const auto MAX_COL = 65535;
-const auto BLACK = cv::Vec3w(0,0,0);
-const auto WHITE = cv::Vec3w(MAX_COL,MAX_COL,MAX_COL);
-const auto BLUE = cv::Vec3w(MAX_COL,0,0);
-const auto GREEN = cv::Vec3w(0,MAX_COL,0);
-const auto RED = cv::Vec3w(0,0,MAX_COL);
+const auto BLACK = Vec3w(0,0,0);
+const auto WHITE = Vec3w(MAX_COL,MAX_COL,MAX_COL);
+const auto BLUE = Vec3w(MAX_COL,0,0);
+const auto GREEN = Vec3w(0,MAX_COL,0);
+const auto RED = Vec3w(0,0,MAX_COL);
 
-void drawCircleImp(cv::Mat &pic, double x, double y, double r, bool fill) {
+void drawCircleImp(Mat &pic, double x, double y, double r, bool fill) {
     const double DELTA = 0.015;
 
     for (size_t i = 0; i < pic.cols; ++i) {
         for (size_t j = 0; j < pic.rows; ++j) {
             if (!fill) {
                 if (abs(sqrt((i - x) * (i - x) + (j - y) * (j - y)) / r - 1) < DELTA) {
-                    pic.at<cv::Vec3w>(j, i) = BLACK;
+                    pic.at<Vec3w>(j, i) = BLACK;
                 }
             } else {
                 if (sqrt((i - x) * (i - x) + (j - y) * (j - y)) / r - 1 < DELTA) {
-                    pic.at<cv::Vec3w>(j, i) = BLACK;
+                    pic.at<Vec3w>(j, i) = BLACK;
                 }
             }
         }
     }
 }
 
-void colorQuadpixel(cv::Mat &pic, double X, double Y, const cv::Vec3w &colour) {
-    pic.at<cv::Vec3w>(static_cast<int>(floor(Y)), static_cast<int>(floor(X))) = colour;
-    pic.at<cv::Vec3w>(static_cast<int>(floor(Y)), static_cast<int>(ceil(X))) = colour;
-    pic.at<cv::Vec3w>(static_cast<int>(ceil(Y)), static_cast<int>(floor(X))) = colour;
-    pic.at<cv::Vec3w>(static_cast<int>(ceil(Y)), static_cast<int>(ceil(X))) = colour;
+void colorQuadpixel(Mat &pic, double X, double Y, const Vec3w &colour) {
+    pic.at<Vec3w>(static_cast<int>(floor(Y)), static_cast<int>(floor(X))) = colour;
+    pic.at<Vec3w>(static_cast<int>(floor(Y)), static_cast<int>(ceil(X))) = colour;
+    pic.at<Vec3w>(static_cast<int>(ceil(Y)), static_cast<int>(floor(X))) = colour;
+    pic.at<Vec3w>(static_cast<int>(ceil(Y)), static_cast<int>(ceil(X))) = colour;
 }
 
-void drawSpiral(cv::Mat &pic, const cv::Point2d& center, double maxRadius) {
+void drawSpiral(Mat &pic, const Point2d& center, double maxRadius) {
     double radius = maxRadius;
     double radiusDecrement = 0.01;
     double angle = M_PI_4;
@@ -46,7 +47,7 @@ void drawSpiral(cv::Mat &pic, const cv::Point2d& center, double maxRadius) {
         double X = radius * cos(angle) + center.x;
         double Y = radius * sin(angle) + center.y;
         double ratio = radius/maxRadius;
-        colorQuadpixel(pic, X, Y, cv::Vec3w(ratio*MAX_COL, (1-ratio)*MAX_COL, 4*(1-ratio)*ratio*MAX_COL));
+        colorQuadpixel(pic, X, Y, Vec3w(ratio*MAX_COL, (1-ratio)*MAX_COL, 4*(1-ratio)*ratio*MAX_COL));
         radius -= radiusDecrement;
         angle += angleIncrement;
     }
@@ -224,31 +225,152 @@ void optical2(Mat &pic, double period, unsigned squareParam) {
     }
 }
 
+void optical3(Mat &pic, unsigned squareSize) {
+    const Vec3w GRAY{MAX_COL/2, MAX_COL/2, MAX_COL/2};
+    unsigned lineWidth = 5;
+    unsigned adjustment = squareSize * (pic.cols / squareSize + 1);
+
+    for (unsigned x = 0; x < pic.cols; ++x) {
+        for (unsigned y = 0; y < pic.rows; ++y) {
+            if (((x + squareSize/2) % squareSize <= lineWidth)
+            || ((x + squareSize/2) % squareSize >= squareSize-lineWidth)
+            || ((y + squareSize/2) % squareSize <= lineWidth)
+            || ((y + squareSize/2) % squareSize >= squareSize-lineWidth)
+            || ((x - y + adjustment) % squareSize <= sqrt(2)*lineWidth)
+            || ((x - y + adjustment) % squareSize >= squareSize-sqrt(2)*lineWidth)
+            || ((x + y) % squareSize <= sqrt(2)*lineWidth)
+            || ((x + y) % squareSize >= squareSize-sqrt(2)*lineWidth)) {
+                pic.at<Vec3w>(y,x) = GRAY;
+            }
+        }
+    }
+
+    for (unsigned x = 0; x < pic.cols; ++x) {
+        for (unsigned y = 0; y < pic.rows; ++y) {
+            unsigned closestCenterX = squareSize * (x / squareSize + 1) - squareSize/2;
+            unsigned closestCenterY = squareSize * (y / squareSize + 1) - squareSize/2;
+            if (distance(x, y, closestCenterX, closestCenterY) < 2*lineWidth) {
+                pic.at<Vec3w>(y, x) = BLACK;
+            }
+        }
+    }
+}
+
+void solveRiddle1(Mat &pic) {
+    for (unsigned x = 0; x < pic.cols; ++x) {
+        for (unsigned y = 0; y < pic.rows; ++y) {
+            pic.at<Vec3w>(y,x).val[0] *= 24;
+            pic.at<Vec3w>(y,x).val[1] = 0;
+            pic.at<Vec3w>(y,x).val[2] = 0;
+            cout    << pic.at<Vec3w>(y,x).val[0] << " "
+                    << pic.at<Vec3w>(y,x).val[1] << " "
+                    << pic.at<Vec3w>(y,x).val[2] << " " << endl;
+        }
+    }
+}
+
+void solveRiddle2(Mat &pic) {
+    for (unsigned x = 0; x < pic.cols-1; ++x) {
+        for (unsigned y = 0; y < pic.rows; ++y) {
+            pic.at<Vec3w>(y,x).val[0] = 40*abs(pic.at<Vec3w>(y,x).val[0] - pic.at<Vec3w>(y,x+1).val[0]);
+            pic.at<Vec3w>(y,x).val[1] = 40*abs(pic.at<Vec3w>(y,x).val[1] - pic.at<Vec3w>(y,x+1).val[1]);
+            pic.at<Vec3w>(y,x).val[2] = 40*abs(pic.at<Vec3w>(y,x).val[2] - pic.at<Vec3w>(y,x+1).val[2]);
+            cout    << pic.at<Vec3w>(y,x).val[0] << " "
+                    << pic.at<Vec3w>(y,x).val[1] << " "
+                    << pic.at<Vec3w>(y,x).val[2] << " " << endl;
+        }
+    }
+}
+
+void solveRiddle3(Mat &pic) {
+    for (unsigned x = 0; x < pic.cols; ++x) {
+        for (unsigned y = 0; y < pic.rows; ++y) {
+            if ((x+y) % 2 == 1) {
+                pic.at<Vec3w>(y,x).val[0] = MAX_COL - pic.at<Vec3w>(y,x).val[0];
+                pic.at<Vec3w>(y,x).val[1] = MAX_COL - pic.at<Vec3w>(y,x).val[1];
+                pic.at<Vec3w>(y,x).val[2] = MAX_COL - pic.at<Vec3w>(y,x).val[2];
+            }
+        }
+    }
+}
+
+void convertToRiddle(Mat &pic) {
+    const uint8_t PRIME = 23;
+    const uint8_t ALPHA = MAX_COL_8BIT/PRIME;
+    for (unsigned x = 0; x < pic.cols; ++x) {
+        for (unsigned y = 0; y < pic.rows-1; ++y) {
+            if (pic.at<Vec3b>(y,x).val[0] > pic.at<Vec3b>(y,x).val[1]) {
+                pic.at<Vec3b>(y,x) = Vec3b((rand() % ALPHA) * PRIME + 1,
+                        (rand() % ALPHA) * PRIME + 1, (rand() % ALPHA) * PRIME + 1);
+            } else {
+                pic.at<Vec3b>(y,x) = Vec3b((rand() % ALPHA) * PRIME, (rand() % ALPHA) * PRIME, (rand() % ALPHA) * PRIME);
+            }
+        }
+    }
+}
+
+void solveRiddle(Mat &pic) {
+    const uint8_t PRIME = 23;
+    const uint8_t ALPHA = MAX_COL_8BIT/PRIME;
+    for (unsigned x = 0; x < pic.cols; ++x) {
+        for (unsigned y = 0; y < pic.rows-1; ++y) {
+            pic.at<Vec3b>(y,x).val[0] = (pic.at<Vec3b>(y,x).val[0] % PRIME) * MAX_COL_8BIT;
+            pic.at<Vec3b>(y,x).val[1] = (pic.at<Vec3b>(y,x).val[1] % PRIME) * MAX_COL_8BIT;
+            pic.at<Vec3b>(y,x).val[2] = (pic.at<Vec3b>(y,x).val[2] % PRIME) * MAX_COL_8BIT;
+        }
+    }
+}
+
 
 int main() {
 
-    /*cv::Mat picture(1000, 1000, CV_16UC3, WHITE);
+    /*Mat picture(1000, 1000, CV_16UC3, WHITE);
     drawCircleImp(picture, 200, 120, 100, false);
     drawCircleImp(picture, 800, 120, 100, true);
     drawSpiral(picture, {780, 780}, 200);
     equaliteralTriangle(picture, 100, 900, 300);
     ellipse(picture, 400, 600, 600, 400, 400);
-    cv::imwrite("task4A.png", picture);*/
+    imwrite("task4A.png", picture);*/
 
-    /*cv::Mat picture2(500, 500, CV_16UC3, WHITE);
+    /*Mat picture2(500, 500, CV_16UC3, WHITE);
     polygon(picture2, {{50, 50}, {250, 300}, {450, 50}, {350, 250},
                        {450, 450}, {250, 350}, {50, 450}, {150, 250}});
     imwrite("task4B.png", picture2);*/
 
-    cv::Mat picture3A(1000, 1000, CV_16UC3, WHITE);
+    /*Mat picture3A(1000, 1000, CV_16UC3, WHITE);
     optical1(picture3A, 40, 125);
     imwrite("task4C-A.png", picture3A);
 
-    cv::Mat picture3B(1000, 1000, CV_16UC3, WHITE);
+    Mat picture3B(1000, 1000, CV_16UC3, WHITE);
     optical2(picture3B, 75, 400);
-    imwrite("task4C-B.png", picture3B);
+    imwrite("task4C-B.png", picture3B);*/
+    
+    /*Mat picture3C(1000, 1000, CV_16UC3, WHITE);
+    optical3(picture3C, 200);
+    imwrite("task4C-C.png", picture3C);*/
 
+    /*auto riddle1 = imread("skryvacka1.png");
+    riddle1.convertTo(riddle1, CV_16UC3, 256);
+    solveRiddle1(riddle1);
+    imwrite("solution1.png", riddle1);
 
+    auto riddle2 = imread("skryvacka2.png");
+    riddle2.convertTo(riddle2, CV_16UC3, 256);
+    solveRiddle2(riddle2);
+    imwrite("solution2.png", riddle2);
+
+    auto riddle3 = imread("skryvacka3.png");
+    riddle3.convertTo(riddle3, CV_16UC3, 256);
+    solveRiddle3(riddle3);
+    imwrite("solution3.png", riddle3);*/
+
+    auto original = imread("original.png");
+    convertToRiddle(original);
+    imwrite("riddle.png", original);
+
+    auto riddle = imread("riddle.png");
+    solveRiddle(riddle);
+    imwrite("solution.png", riddle);
 
     return 0;
 }
