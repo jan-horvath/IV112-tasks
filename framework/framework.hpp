@@ -23,16 +23,34 @@ namespace svg {
             return {this->X * n, this->Y * n};
         }
 
-        Vector norm() {
+        Vector norm() const {
             double length = sqrt(X*X + Y*Y);
             return {X/length, Y/length};
+        }
+
+        double getLength() const {
+            return sqrt(X*X + Y*Y);
+        }
+
+        double getAngle(const Vector& v) const {
+            double epsilon = 0.0001;
+            return acos((X*v.X + Y*v.Y)/(this->getLength() * v.getLength()) - epsilon);
         }
     };
 
 
     struct Point {
-        double X;
-        double Y;
+        double X = 0.0;
+        double Y = 0.0;
+
+        bool operator==(const Point &rhs) const {
+            return X == rhs.X &&
+                   Y == rhs.Y;
+        }
+
+        bool operator!=(const Point &rhs) const {
+            return !(rhs == *this);
+        }
 
         Vector operator-(const Point& p) const {
             return {this->X - p.X, this->Y - p.Y};
@@ -44,11 +62,38 @@ namespace svg {
     };
 
     struct LineSegment {
+        constexpr static double NO_INTERSECTION = std::numeric_limits<double>::min();
         Point P1;
         Point P2;
 
-        Vector getVec() {
+        Vector getVec() const {
             return P2 - P1;
+        }
+
+        Point intersect(const LineSegment& ls) const {
+            Point P;
+            double EPSILON = 0.01;
+            P.X = ((this->P1.X*this->P2.Y - this->P1.Y*this->P2.X) * (ls.P1.X - ls.P2.X)
+                   - (this->P1.X - this->P2.X) * (ls.P1.X*ls.P2.Y - ls.P1.Y*ls.P2.X)) /
+                   ((this->P1.X - this->P2.X)*(ls.P1.Y - ls.P2.Y)
+                   - (this->P1.Y - this->P2.Y)*(ls.P1.X - ls.P2.X));
+            P.Y = ((this->P1.X*this->P2.Y - this->P1.Y*this->P2.X) * (ls.P1.Y - ls.P2.Y)
+                   - (this->P1.Y - this->P2.Y) * (ls.P1.X*ls.P2.Y - ls.P1.Y*ls.P2.X)) /
+                  ((this->P1.X - this->P2.X)*(ls.P1.Y - ls.P2.Y)
+                   - (this->P1.Y - this->P2.Y)*(ls.P1.X - ls.P2.X));
+            double lambda1 = (P.X - ls.P1.X)/(ls.P2.X - ls.P1.X);
+            double lambda2 = (P.X - this->P1.X)/(this->P2.X - this->P1.X);
+
+            if ((lambda1 < 0 + EPSILON) || (lambda1 > 1 - EPSILON) || (lambda2 < 0 + EPSILON) || (lambda2 > 1 - EPSILON)) {
+                return {NO_INTERSECTION, NO_INTERSECTION};
+            }
+
+            return P;
+        }
+
+        double getLength() const {
+            Vector vec = this->getVec();
+            return sqrt(vec.X*vec.X + vec.Y*vec.Y);
         }
     };
 
