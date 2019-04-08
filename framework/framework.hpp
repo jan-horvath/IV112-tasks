@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cmath>
 #include <vector>
+#include <cassert>
 
 namespace svg {
 
@@ -14,6 +15,42 @@ namespace svg {
         "tomato", "greenyelow", "turquoise", "dodgerblue", "purple", "mediumvioletred",
         "darkorange", "lightgreen", "aquamarine", "royalblue", "mediumpurple", "hotpink"
     };
+
+    struct Matrix {
+        std::vector<double> _d;
+        size_t _rows;
+        size_t _cols;
+
+        Matrix(size_t rows, size_t cols) : _d(rows*cols, 0), _rows(rows), _cols(cols) {}
+
+        Matrix(std::initializer_list<double> list, size_t rows, size_t cols) : _d(list), _rows(rows), _cols(cols) {}
+
+        Matrix operator* (const Matrix& mat) {
+            assert(_cols == mat._rows);
+
+            Matrix product(_rows, mat._cols);
+            for (size_t row = 0; row < _rows; ++row) {
+                for (size_t col = 0; col < mat._cols; ++col) {
+
+                    for (size_t i = 0; i < _cols; ++i) {
+                        product._d.at(row*mat._cols + col) += _d.at(_cols*row+i) * mat._d.at(i*mat._cols+col);
+                    }
+
+                }
+            }
+            return std::move(product);
+        }
+
+        //TODO add operator *=
+    };
+
+    //TODO translation, scaling, rotation, replexion(axis)
+    //TODO transformation composition, draw(geom. object), applyToLine(line, tranformation), applyToObject(object = vector<lines>, transformation)
+    //TODO generateSquare, generateTraingle, generate[someOtherObject]
+
+    Matrix translation(double X, double Y) {
+
+    }
 
     struct Vector {
         double X;
