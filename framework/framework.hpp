@@ -56,6 +56,14 @@ namespace svg {
         double X;
         double Y;
 
+        bool operator==(const Vector &rhs) const {
+            return (fabs(X - rhs.X) < 0.001) && (fabs(Y - rhs.Y) < 0.001);
+        }
+
+        bool operator!=(const Vector &rhs) const {
+            return !(rhs == *this);
+        }
+
         Vector operator*(double n) {
             return {this->X * n, this->Y * n};
         }
@@ -70,8 +78,8 @@ namespace svg {
         }
 
         double getAngle(const Vector& v) const {
-            double epsilon = 0.0001;
-            return acos((X*v.X + Y*v.Y)/(this->getLength() * v.getLength()) - epsilon);
+            double epsilon = 0.9999;
+            return acos((X*v.X + Y*v.Y)/(this->getLength() * v.getLength()) * epsilon);
         }
     };
 
@@ -108,6 +116,10 @@ namespace svg {
         }
 
         Point intersect(const LineSegment& ls) const {
+            if ((ls.getVec().norm() == getVec().norm()) || (ls.getVec().norm()*(-1) == getVec().norm())) {
+                return {NO_INTERSECTION, NO_INTERSECTION};
+            }
+
             Point P;
             double EPSILON = 0.01;
             P.X = ((this->P1.X*this->P2.Y - this->P1.Y*this->P2.X) * (ls.P1.X - ls.P2.X)
@@ -120,6 +132,8 @@ namespace svg {
                    - (this->P1.Y - this->P2.Y)*(ls.P1.X - ls.P2.X));
             double lambda1 = (P.X - ls.P1.X)/(ls.P2.X - ls.P1.X);
             double lambda2 = (P.X - this->P1.X)/(this->P2.X - this->P1.X);
+            if (__isnan(lambda1)) {lambda1 = (P.Y - ls.P1.Y)/(ls.P2.Y - ls.P1.Y);}
+            if (__isnan(lambda2)) {lambda2 = (P.Y - this->P1.Y)/(this->P2.Y - this->P1.Y);}
 
             if ((lambda1 < 0 + EPSILON) || (lambda1 > 1 - EPSILON) || (lambda2 < 0 + EPSILON) || (lambda2 > 1 - EPSILON)) {
                 return {NO_INTERSECTION, NO_INTERSECTION};

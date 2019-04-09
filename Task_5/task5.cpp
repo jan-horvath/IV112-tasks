@@ -66,9 +66,13 @@ vector<Point> generatePoints_lattice(SVGFile& file, unsigned spacing, unsigned m
     for (unsigned x = minX; x <= maxX; x += spacing) {
         for (unsigned y = minY; y <= maxY; y += spacing) {
             if ((rand() % 100) + 1 > percentageToDump) {
-                int noiseX = (rand() % 9) + 4;
-                int noiseY = (rand() % 9) + 4;
-                points.push_back({(double)(x + noiseX), (double)(y+ noiseY)});
+                if ((x == minX) || (y == minY) || (x + spacing > maxX) || (y + spacing > maxY)) {
+                    points.push_back({(double)(x), (double)y});
+                } else {
+                    int noiseX = (rand() % 9) + 4;
+                    int noiseY = (rand() % 9) + 4;
+                    points.push_back({(double) (x + noiseX), (double) (y + noiseY)});
+                }
                 file.addCircle(points.back(), 2, true);
             }
         }
@@ -166,6 +170,10 @@ int main() {
     auto pointsB1 = generatePoints_lattice(fileB1, 100, 300, 700, 300, 700, 0);
     triangulate(fileB1, pointsB1, true);
 
+    SVGFile fileB0("task5B-0.svg", 1000, 1000);
+    auto pointsB0 = generatePoints_lattice(fileB0, 100, 300, 700, 300, 700, 25);
+    triangulate(fileB0, pointsB0, true);
+
     SVGFile fileB2("task5B-2.svg", 1000, 1000);
     auto pointsB2 = generatePoints_normal(fileB2, 100, 500, 100, 500, 100);
     triangulate(fileB2, pointsB2, true);
@@ -177,6 +185,10 @@ int main() {
     SVGFile fileC1("task5C-1.svg", 1000, 1000);
     auto pointsC1 = generatePoints_lattice(fileC1, 100, 300, 700, 300, 700, 0);
     konvexHullJarvis(fileC1, pointsC1);
+
+    SVGFile fileC0("task5C-0.svg", 1000, 1000);
+    auto pointsC0 = generatePoints_lattice(fileC0, 100, 300, 700, 300, 700, 25);
+    konvexHullJarvis(fileC0, pointsC0);
 
     SVGFile fileC2("task5C-2.svg", 1000, 1000);
     auto pointsC2 = generatePoints_normal(fileC2, 100, 500, 100, 500, 100);
