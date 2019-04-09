@@ -76,6 +76,21 @@ vector<Point> generatePoints_lattice(SVGFile& file, unsigned spacing, unsigned m
     return move(points);
 }
 
+vector<Point> generatePoints_circle(SVGFile& file, unsigned radius, unsigned count, Point center, bool includeCenter) {
+    vector<Point> points;
+    double angle = 2*M_PI / count;
+    for (unsigned i = 0; i < count; ++i) {
+        points.push_back({radius * cos(angle * i + 0.1) + center.X, radius * sin(angle*i+0.1) + center.Y});
+        file.addCircle(points.back(), 2, true);
+    }
+
+    if (includeCenter) {
+        points.push_back(center);
+        file.addCircle(points.back(), 2, true);
+    }
+    return move(points);
+}
+
 vector<LineSegment> getLineSegmentsFromPoints(const vector<Point> &points) {
     vector<LineSegment> segments;
     for (unsigned i = 0; i < points.size(); ++i) {
@@ -147,15 +162,29 @@ int main() {
     auto lineSegments = generateLineSegments(fileA, 35, 300);
     detectIntersections(fileA, lineSegments);
 
-    SVGFile fileB("task5B.svg", 1000, 1000);
-    auto points = generatePoints_lattice(fileB, 100, 300, 700, 300, 700, 0);
-    triangulate(fileB, points, true);
+    SVGFile fileB1("task5B-1.svg", 1000, 1000);
+    auto pointsB1 = generatePoints_lattice(fileB1, 100, 300, 700, 300, 700, 0);
+    triangulate(fileB1, pointsB1, true);
 
-    SVGFile fileC("task5C.svg", 1000, 1000);
-    auto points2 = generatePoints_normal(fileC, 20, 500, 300, 200, 50);//generatePoints_uniform(fileC, 50, 0, 1000, 0, 1000);
-    konvexHullJarvis(fileC, points2);
+    SVGFile fileB2("task5B-2.svg", 1000, 1000);
+    auto pointsB2 = generatePoints_normal(fileB2, 100, 500, 100, 500, 100);
+    triangulate(fileB2, pointsB2, true);
 
+    SVGFile fileB3("task5B-3.svg", 1000, 1000);
+    auto pointsB3 = generatePoints_circle(fileB3, 500, 40, {500, 500}, true);
+    triangulate(fileB3, pointsB3, true);
 
+    SVGFile fileC1("task5C-1.svg", 1000, 1000);
+    auto pointsC1 = generatePoints_lattice(fileC1, 100, 300, 700, 300, 700, 0);
+    konvexHullJarvis(fileC1, pointsC1);
+
+    SVGFile fileC2("task5C-2.svg", 1000, 1000);
+    auto pointsC2 = generatePoints_normal(fileC2, 100, 500, 100, 500, 100);
+    konvexHullJarvis(fileC2, pointsC2);
+
+    SVGFile fileC3("task5C-3.svg", 1000, 1000);
+    auto pointsC3 = generatePoints_circle(fileC3, 500, 15, {500, 500}, true);
+    konvexHullJarvis(fileC3, pointsC3);
 
     return 0;
 }

@@ -123,7 +123,7 @@ void ellipse(Mat &pic, double x1, double y1, double x2, double y2, double maxDis
 }*/
 
 void line(Mat &pic, double x1, double y1, double x2, double y2) {
-    double step = 1.0/(abs(y2 - y1) + abs(x2 - x1));///distance(x1, y1, x2, y2); //
+    double step = 1.0/(abs(y2 - y1) + abs(x2 - x1));
     double x = x1;
     double y = y1;
     for (double lambda = 0.0; lambda <= 1.0; lambda += step) {
@@ -262,9 +262,6 @@ void solveRiddle1(Mat &pic) {
             pic.at<Vec3w>(y,x).val[0] *= 24;
             pic.at<Vec3w>(y,x).val[1] = 0;
             pic.at<Vec3w>(y,x).val[2] = 0;
-            cout    << pic.at<Vec3w>(y,x).val[0] << " "
-                    << pic.at<Vec3w>(y,x).val[1] << " "
-                    << pic.at<Vec3w>(y,x).val[2] << " " << endl;
         }
     }
 }
@@ -275,9 +272,6 @@ void solveRiddle2(Mat &pic) {
             pic.at<Vec3w>(y,x).val[0] = 40*abs(pic.at<Vec3w>(y,x).val[0] - pic.at<Vec3w>(y,x+1).val[0]);
             pic.at<Vec3w>(y,x).val[1] = 40*abs(pic.at<Vec3w>(y,x).val[1] - pic.at<Vec3w>(y,x+1).val[1]);
             pic.at<Vec3w>(y,x).val[2] = 40*abs(pic.at<Vec3w>(y,x).val[2] - pic.at<Vec3w>(y,x+1).val[2]);
-            cout    << pic.at<Vec3w>(y,x).val[0] << " "
-                    << pic.at<Vec3w>(y,x).val[1] << " "
-                    << pic.at<Vec3w>(y,x).val[2] << " " << endl;
         }
     }
 }
@@ -330,26 +324,26 @@ int main() {
     drawSpiral(picture, {780, 780}, 200);
     equaliteralTriangle(picture, 100, 900, 300);
     ellipse(picture, 400, 600, 600, 400, 400);
-    imwrite("task4A.png", picture);*/
+    imwrite("task4A.png", picture);
 
-    /*Mat picture2(500, 500, CV_16UC3, WHITE);
+    Mat picture2(500, 500, CV_16UC3, WHITE);
     polygon(picture2, {{50, 50}, {250, 300}, {450, 50}, {350, 250},
                        {450, 450}, {250, 350}, {50, 450}, {150, 250}});
-    imwrite("task4B.png", picture2);*/
+    imwrite("task4B.png", picture2);
 
-    /*Mat picture3A(1000, 1000, CV_16UC3, WHITE);
+    Mat picture3A(1000, 1000, CV_16UC3, WHITE);
     optical1(picture3A, 40, 125);
     imwrite("task4C-A.png", picture3A);
 
     Mat picture3B(1000, 1000, CV_16UC3, WHITE);
     optical2(picture3B, 75, 400);
-    imwrite("task4C-B.png", picture3B);*/
+    imwrite("task4C-B.png", picture3B);
     
-    /*Mat picture3C(1000, 1000, CV_16UC3, WHITE);
+    Mat picture3C(1000, 1000, CV_16UC3, WHITE);
     optical3(picture3C, 200);
     imwrite("task4C-C.png", picture3C);*/
 
-    /*auto riddle1 = imread("skryvacka1.png");
+    auto riddle1 = imread("skryvacka1.png");
     riddle1.convertTo(riddle1, CV_16UC3, 256);
     solveRiddle1(riddle1);
     imwrite("solution1.png", riddle1);
@@ -362,7 +356,7 @@ int main() {
     auto riddle3 = imread("skryvacka3.png");
     riddle3.convertTo(riddle3, CV_16UC3, 256);
     solveRiddle3(riddle3);
-    imwrite("solution3.png", riddle3);*/
+    imwrite("solution3.png", riddle3);
 
     auto original = imread("original.png");
     convertToRiddle(original);

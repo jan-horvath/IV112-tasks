@@ -305,7 +305,7 @@ void customFractal3(Turtle &t, double length, unsigned depth) {
 }
 
 int main() {
-    /*
+
     //TASK A
     Turtle tA("task3A.svg", 1000, 1000);
     for (unsigned i = 1; i < 4; ++i) {
@@ -322,9 +322,9 @@ int main() {
     drawPentagramR(A, 400);
     drawPentagramA(file, 400);
 
-    Turtle B1("task3B-B1", 1000, 1000);
+    Turtle B1("task3B-B1.svg", 1000, 1000);
+    Turtle B2("task3B-B2.svg", 1000, 1000);
     recursiveSquare(B1, 150, 50, 1.01);
-    Turtle B2("task3B-B2", 1000, 1000);
     recursiveSquare(B2, 50, 600, 0.1);
 
     SVGFile C("task3B-C.svg", 1000, 1000);
@@ -347,32 +347,32 @@ int main() {
     Ca.back(300);
     Ca.drawing(true);
     recBush(Ca, 120, 10, 11111111);
-    */
 
-    /*Turtle Cb("task3C-B.svg", 1000, 1000);
+
+    Turtle Cb("task3C-B.svg", 1000, 1000);
     Cb.left(90);
-    koch(Cb, 400, 5);*/
+    koch(Cb, 400, 5);
 
-    /*Turtle Cc("task3C-C.svg", 1000, 1000);
+    Turtle Cc("task3C-C.svg", 1000, 1000);
     Cc.drawing(false);
     Cc.left(90);
     Cc.back(100);
-    sierpinski(Cc, 500, 8);*/
+    sierpinski(Cc, 500, 8);
 
-    /*Turtle Ce("task3C-E.svg", 1000, 1000);
-    polySnowflake(Ce, 8, 500, 3);*/
+    Turtle Ce("task3C-E.svg", 1000, 1000);
+    polySnowflake(Ce, 5, 500, 3);
 
-    //SVGFile D1("task3D-1.svg", 1250, 1250, COLORS[0]);
-    //customFractal1(D1, {625, 625}, 725, 1);
+    SVGFile D1("task3D-1.svg", 1250, 1250, COLORS[0]);
+    customFractal1(D1, {625, 625}, 700, 1);
 
-    /*Turtle D2("task3D-2.svg", 1000, 1000);
+    Turtle D2("task3D-2.svg", 1000, 1000);
     D2.drawing(false);
     D2.back(500);
     D2.left(90);
     D2.back(400);
     D2.right(90);
     D2.drawing(true);
-    customFractal2(D2, 1000, 3);*/
+    customFractal2(D2, 1000, 3);
 
     Turtle D3("task3D-3.svg", 1000, 1000);
     D3.drawing(false);
