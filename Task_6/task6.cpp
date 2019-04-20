@@ -1,5 +1,6 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include "../framework/framework.hpp"
 
 using namespace std;
 using namespace cv;
@@ -88,6 +89,10 @@ void feigenbaum(Mat &pic, double xmin, double xmax, double rmin, double rmax) {
     }
 }
 
+void foo(int a, int b, char c) {
+    cout << a + b + c << endl;
+}
+
 int main() {
 
     /*Mat pictureA1(1440, 1440, CV_16UC3, WHITE);
@@ -104,12 +109,75 @@ int main() {
               {{200, 200}, {800, 200}, {500, 900}, {500, 500}}, 3000000);
     cv::imwrite("task6A3.png", pictureA3);*/
 
-    auto a = getLogisticPattern(0.7);
+    /*auto a = getLogisticPattern(0.7);
 
     Mat feigenbaum1(1440, 2560, CV_16UC3, WHITE);
     feigenbaum(feigenbaum1, 0.3, 0.7, 0.85, 0.99);
-    imwrite("feigenbaum1.png", feigenbaum1);
+    imwrite("feigenbaum1.png", feigenbaum1);*/
 
+    using namespace svg;
+    /*LSystem lSystem1("task6_C1.svg", 1440, 1440);
+    lSystem1.addTranslationRule('F', {"F+F--F+F"});
+    lSystem1.addDrawingRule<double>('F', &Turtle::forward, 5.0);
+    lSystem1.addDrawingRule<double, bool>('-', &Turtle::left, 60, false);
+    lSystem1.addDrawingRule<double, bool>('+', &Turtle::right, 60, false);
+
+    lSystem1.m_turtle.drawing(false);
+    lSystem1.m_turtle.back(600);
+    lSystem1.m_turtle.left(90);
+    lSystem1.m_turtle.back(350);
+    lSystem1.m_turtle.right(90);
+    lSystem1.m_turtle.drawing(true);
+
+    string str1 = lSystem1.translate("F--F--F", 5);
+    lSystem1.drawString(str1);
+
+    LSystem lSystem2("task6_C2.svg", 1440, 1440);
+    lSystem2.addTranslationRule('A', {"B-A-B"});
+    lSystem2.addTranslationRule('B', {"A+B+A"});
+    lSystem2.addDrawingRule<double>('A', &Turtle::forward, 10.0);
+    lSystem2.addDrawingRule<double>('B', &Turtle::forward, 10.0);
+    lSystem2.addDrawingRule<double, bool>('-', &Turtle::left, 60, false);
+    lSystem2.addDrawingRule<double, bool>('+', &Turtle::right, 60, false);
+
+    lSystem2.m_turtle.drawing(false);
+    lSystem2.m_turtle.right(45);
+    lSystem2.m_turtle.back(1000);
+    lSystem2.m_turtle.left(45);
+    lSystem2.m_turtle.drawing(true);
+
+    string str2 = lSystem2.translate("A", 7);
+    lSystem2.drawString(str2);*/
+
+    /*LSystem lSystem3("task6_C3.svg", 1440, 1440);
+    lSystem3.addTranslationRule('F', {"FF+[+F-FF]-[-F+F+F]"});
+    lSystem3.addDrawingRule<double>('F', &Turtle::forward, 15.0);
+    lSystem3.addDrawingRule<double, bool>('-', &Turtle::left, 25, false);
+    lSystem3.addDrawingRule<double, bool>('+', &Turtle::right, 25, false);
+    lSystem3.addDrawingRule('[', &Turtle::pushPosition);
+    lSystem3.addDrawingRule(']', &Turtle::popPosition);
+
+    lSystem3.m_turtle.drawing(false);
+    lSystem3.m_turtle.back(500);
+    lSystem3.m_turtle.drawing(true);
+
+    string x = lSystem3.translate("F", 4);
+    lSystem3.drawString(x);*/
+
+    /*LSystem lSystem4("task6_C4.svg", 1440, 1440);
+    lSystem4.addTranslationRule('F', {"F[+F]F[-F]F", "F[+F]F", "F[-F]F"});
+    lSystem4.addDrawingRule<double>('F', &Turtle::forward, 15.0);
+    lSystem4.addDrawingRule<double, bool>('-', &Turtle::left, 30, false);
+    lSystem4.addDrawingRule<double, bool>('+', &Turtle::right, 30, false);
+    lSystem4.addDrawingRule('[', &Turtle::pushPosition);
+    lSystem4.addDrawingRule(']', &Turtle::popPosition);
+
+    lSystem4.m_turtle.drawing(false);
+    lSystem4.m_turtle.back(500);
+    lSystem4.m_turtle.drawing(true);
+
+    string x = lSystem4.translate("F", 6);
+    lSystem4.drawString(x);*/
 
 
     return 0;
