@@ -139,7 +139,7 @@ namespace svg {
             }
 
             Point P;
-            double EPSILON = 0.01;
+            double EPSILON = 0.001;
             P.X = ((this->P1.X*this->P2.Y - this->P1.Y*this->P2.X) * (ls.P1.X - ls.P2.X)
                    - (this->P1.X - this->P2.X) * (ls.P1.X*ls.P2.Y - ls.P1.Y*ls.P2.X)) /
                    ((this->P1.X - this->P2.X)*(ls.P1.Y - ls.P2.Y)
@@ -148,6 +148,7 @@ namespace svg {
                    - (this->P1.Y - this->P2.Y) * (ls.P1.X*ls.P2.Y - ls.P1.Y*ls.P2.X)) /
                   ((this->P1.X - this->P2.X)*(ls.P1.Y - ls.P2.Y)
                    - (this->P1.Y - this->P2.Y)*(ls.P1.X - ls.P2.X));
+
             double lambda1 = (P.X - ls.P1.X)/(ls.P2.X - ls.P1.X);
             double lambda2 = (P.X - this->P1.X)/(this->P2.X - this->P1.X);
             if (__isnan(lambda1)) {lambda1 = (P.Y - ls.P1.Y)/(ls.P2.Y - ls.P1.Y);}
@@ -330,10 +331,6 @@ namespace svg {
 
         LSystem(const string &filename, double height, double width) : m_turtle(filename, height, width) {}
 
-        /*LSystem(const string &filename, double height, double width,
-                initializer_list<pair<const char, const string>> trans) :
-                m_turtle(filename, height, width), m_translationRules(trans) {}*/
-
         void addTranslationRule(char c, const vector<string> &s) {
             m_translationRules.insert({c, s});
         }
@@ -351,8 +348,6 @@ namespace svg {
         void addDrawingRule(char c, const function<void(Turtle*, T, U)>& func, T arg1, U arg2) {
             m_drawingRules.insert(std::pair<char, const function<void()>>(c, bind(func, &m_turtle, arg1, arg2)));
         }
-
-
 
         string translate(const string& str, unsigned depth = 1) const {
             string copy = str;
@@ -389,5 +384,3 @@ namespace svg {
         map<char, function<void()>> m_drawingRules;
     };
 };
-
-//TODO possibly add lines at the end
