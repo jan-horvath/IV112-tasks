@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(IV112-tasks)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS -pthread)
 
 add_subdirectory(Task_1)
 add_subdirectory(Task_2)
@@ -30,7 +31,7 @@ target_link_libraries(task1 ${OpenCV_LIBS})
 target_link_libraries(task4 ${OpenCV_LIBS})
 #target_link_libraries(task5 ${OpenCV_LIBS})
 target_link_libraries(task6 ${OpenCV_LIBS})
-#target_link_libraries(task7 ${OpenCV_LIBS})
+target_link_libraries(task7 ${OpenCV_LIBS})
 #target_link_libraries(task8 ${OpenCV_LIBS})
 
 
