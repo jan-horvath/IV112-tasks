@@ -21,6 +21,11 @@ namespace svg {
         "darkorange", "lightgreen", "aquamarine", "royalblue", "mediumpurple", "hotpink"
     };
 
+    double toRad(double degrees) {return M_PI/180 * degrees;}
+    double toDeg(double radians) { return 180/M_PI * radians;}
+
+    struct Object;
+
     struct Matrix {
         vector<double> _d;
         size_t _rows;
@@ -30,7 +35,7 @@ namespace svg {
 
         Matrix(initializer_list<double> list, size_t rows, size_t cols) : _d(list), _rows(rows), _cols(cols) {}
 
-        Matrix operator* (const Matrix& mat) {
+        Matrix& operator*= (const Matrix& mat) {
             assert(_cols == mat._rows);
 
             Matrix product(_rows, mat._cols);
@@ -43,19 +48,70 @@ namespace svg {
 
                 }
             }
-            return move(product);
+            *this = std::move(product);
+            return *this;
         }
 
-        //TODO add operator *=
+        friend Matrix operator*(Matrix lhs, const Matrix& rhs) {
+            lhs *= rhs;
+            return lhs;
+        }
+
+        static Matrix composeTransformation(const vector<Matrix>& transformations) {
+            Matrix result = Matrix::identity();
+            for (const Matrix& transformation : transformations) {
+                result = transformation * result;
+            }
+            return move(result);
+        }
+
+        static Matrix identity() {
+            return Matrix({1,0,0,0,1,0,0,0,1}, 3, 3);
+        }
+
+        static Matrix translation(double X, double Y) {
+            return Matrix({1,0,X,0,1,Y, 0,0,1}, 3, 3);
+        }
+
+        static Matrix scaling(double X, double Y) {
+            return Matrix({X,0,0,0,Y,0,0,0,1}, 3, 3);
+        }
+
+        static Matrix scaling(double X, double Y, double cX, double cY) {
+            return composeTransformation({Matrix::translation(-cX, -cY),
+                                          Matrix::scaling(X, Y),
+                                          Matrix::translation(cX, cY)});
+        }
+
+        static Matrix rotation(double alpha) {
+            double a = toRad(alpha);
+            return Matrix({cos(a), -sin(a), 0, sin(a), cos(a), 0, 0, 0, 1}, 3, 3);
+        }
+
+        static Matrix rotation(double alpha, double cX, double cY) {
+            return composeTransformation({Matrix::translation(-cX, -cY),
+                                          Matrix::rotation(alpha),
+                                          Matrix::translation(cX, cY)});
+        }
+
+        static Matrix reflexion(unsigned axis) {
+            if (axis == 0) return Matrix({1,0,0,0,-1,0,0,0,1}, 3, 3);
+            if (axis == 1) return Matrix({-1,0,0,0,1,0,0,0,1}, 3, 3);
+            return identity();
+        }
+
+        static Matrix shear(double s, unsigned axis) {
+            if (axis == 0) return Matrix({1,s,0,0,1,0,0,0,1}, 3, 3);
+            if (axis == 1) return Matrix({1,0,0,s,1,0,0,0,1}, 3, 3);
+            return identity();
+        }
+
+        static Matrix shear(double s, unsigned axis, double cX, double cY) {
+            return composeTransformation({Matrix::translation(-cX, -cY),
+                                          Matrix::shear(s, axis),
+                                          Matrix::translation(cX, cY)});
+        }
     };
-
-    //TODO translation, scaling, rotation, replexion(axis)
-    //TODO transformation composition, draw(geom. object), applyToLine(line, tranformation), applyToObject(object = vector<lines>, transformation)
-    //TODO generateSquare, generateTraingle, generate[someOtherObject]
-
-    Matrix translation(double X, double Y) {
-
-    }
 
     struct Vector {
         double X;
@@ -87,7 +143,6 @@ namespace svg {
             return acos((X*v.X + Y*v.Y)/(this->getLength() * v.getLength()) * epsilon);
         }
     };
-
 
     struct Point {
         double X = 0.0;
@@ -122,12 +177,28 @@ namespace svg {
         Point operator+(const Vector& v) const {
             return {this->X + v.X, this->Y + v.Y};
         }
+
+        Point& transform(const Matrix& trans) {
+            Matrix transformed({X, Y, 1}, 3, 1);
+            transformed = trans * transformed;
+            X = transformed._d[0];
+            Y = transformed._d[1];
+            return *this;
+        }
     };
 
     struct LineSegment {
         constexpr static double NO_INTERSECTION = numeric_limits<double>::min();
         Point P1;
         Point P2;
+
+        LineSegment() = default;
+        LineSegment(const Point& p1, const Point& p2) : P1(p1), P2(p2) {}
+        LineSegment& operator=(const LineSegment& rhs) {
+            P1 = rhs.P1;
+            P2 = rhs.P2;
+            return *this;
+        }
 
         Vector getVec() const {
             return P2 - P1;
@@ -165,7 +236,59 @@ namespace svg {
             Vector vec = this->getVec();
             return sqrt(vec.X*vec.X + vec.Y*vec.Y);
         }
+
+        LineSegment& applyTransformation(const Matrix& trans) {
+            P1.transform(trans);
+            P2.transform(trans);
+            return *this;
+        }
     };
+
+    struct Object {
+        vector<LineSegment> segments;
+        LineSegment basisVectorA;
+        LineSegment basisVectorB;
+
+        Point center() const {
+            return {basisVectorA.P1.X + 0.5*(basisVectorA.P2.X - basisVectorA.P1.X) + 0.5*(basisVectorB.P2.X - basisVectorB.P1.X),
+                    basisVectorA.P1.Y + 0.5*(basisVectorA.P2.Y - basisVectorA.P1.Y) + 0.5*(basisVectorB.P2.Y - basisVectorB.P1.Y)};
+        }
+
+        Matrix translationMatrix(double Amult, double Bmult) const {
+            double X = Amult * basisVectorA.getVec().X + Bmult * basisVectorB.getVec().X;
+            double Y = Amult * basisVectorA.getVec().Y + Bmult * basisVectorB.getVec().Y;
+            return move(Matrix::translation(X, Y));
+        }
+
+        Matrix rotationMatrix(double alpha) const {
+            auto c = center();
+            return Matrix::rotation(alpha, c.X, c.Y);
+        }
+
+        Matrix scalingMatrix(double X, double Y) const {
+            auto c = center();
+            return Matrix::scaling(X, Y, c.X, c.Y);
+        }
+
+    };
+
+    inline LineSegment transformLine(LineSegment ls, const Matrix& trans) {
+        ls.applyTransformation(trans);
+        return ls;
+    }
+
+    Object transformObject(const Object& obj, const Matrix& trans) {
+        Object transformedObject;
+        transformedObject.segments.reserve(obj.segments.size());
+        for (const auto& ls : obj.segments) {
+            transformedObject.segments.emplace_back(transformLine(ls, trans));
+        }
+
+        transformedObject.basisVectorA = transformLine(obj.basisVectorA, trans);
+        transformedObject.basisVectorB = transformLine(obj.basisVectorB, trans);
+
+        return move(transformedObject);
+    }
 
     class SVGFile {
     public:
@@ -251,6 +374,12 @@ namespace svg {
                     << "\" />" << endl;
         }
 
+        void addObject(const Object &object, const string& col = COLORS[0]) {
+            for (const LineSegment& ls : object.segments) {
+                addLine(ls.P1, ls.P2, col);
+            }
+        }
+
         ~SVGFile() {
             m_file << "</svg>\n\n</body>\n</html>";
         }
@@ -314,9 +443,6 @@ namespace svg {
         }
 
     private:
-        double toRad(double degrees) {return M_PI/180 * degrees;}
-        double toDeg(double radians) { return 180/M_PI * radians;}
-
         SVGFile m_file;
         Point m_pos;
         double m_degree = 90.0;
