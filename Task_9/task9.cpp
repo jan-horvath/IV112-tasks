@@ -4,6 +4,8 @@
 #include <iomanip>
 
 using namespace std;
+const unsigned A = 0;
+const unsigned B = 1;
 
 void girlBoySimulation(unsigned families) {
     unsigned girls = 0;
@@ -49,6 +51,45 @@ void randomBreakdown(unsigned fileNum) {
     }
     cout << "(first)" << endl;
 }
+
+//TODO Make it nicer
+template <unsigned DICE>
+unsigned throwDice() {
+    unsigned n = (rand() % 21) + 1;
+    if (DICE > 1) {DICE = rand() % 2;}
+    if (DICE == 0) {
+        if (n == 1) return 1;
+        if (n <= 3) return 2;
+        if (n <= 6) return 3;
+        if (n <= 10) return 4;
+        if (n <= 15) return 5;
+        if (n <= 21) return 6;
+    } else {
+        if (n <= 6) return 1;
+        if (n <= 11) return 2;
+        if (n <= 15) return 3;
+        if (n <= 18) return 4;
+        if (n <= 20) return 5;
+        if (n <= 21) return 6;
+    }
+}
+
+template <unsigned DICE>
+double nThrowAverage(unsigned n) {
+    double sum = 0.0;
+    for (unsigned i = 0; i < n; ++i) {
+        sum += throwDice<DICE>();
+    }
+    return sum/n;
+};
+
+template <unsigned DICE>
+unsigned throwPossiblyFakeDice() {
+    //TODO finish
+}
+
+// TODO create n-k thrower which outputs vector<double> for the plot function
+// TODO plot in svg: plot(vector<double>) {sort, group together and draw line upward}
 
 int main() {
     srand(35);

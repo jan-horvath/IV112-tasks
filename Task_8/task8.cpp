@@ -40,7 +40,7 @@ void MRCM(SVGFile &file, const Object& object, const vector<function<Matrix(cons
     }
 
     for (const auto& generator: transGen) {
-        MRCM(file, transformObject(object, generator(object)), transGen, iterations-1);
+        //MRCM(file, transformObject(object, generator(object)), transGen, iterations-1);
     }
 }
 
@@ -87,10 +87,10 @@ int main() {
         fileD.addObject(o);
     }*/
 
-    using namespace placeholders;
+    /*using namespace placeholders;
     const vector<function<Matrix(const Object&)>> tranformationGenerators;
     function<Matrix(const Object&)> func1 =
             bind(Matrix::composeTransformation, {bind(&Object::translationMatrix, _1, 0.5, 0), bind(&Object::scalingMatrix, _1, 0.5, 0)});
-
+*/
     return 0;
 }

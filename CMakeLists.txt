@@ -13,6 +13,7 @@ add_subdirectory(Task_6)
 add_subdirectory(Task_7)
 add_subdirectory(Task_8)
 add_subdirectory(Task_9)
+add_subdirectory(Task_11)
 
 
 set(OpenCV_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opencv/build/)
@@ -27,6 +28,7 @@ add_executable(task6 Task_6/task6.cpp)
 add_executable(task7 Task_7/task7.cpp)
 add_executable(task8 Task_8/task8.cpp)
 add_executable(task9 Task_9/task9.cpp)
+add_executable(task11 Task_11/task11.cpp)
 
 target_link_libraries(task1 ${OpenCV_LIBS})
 #target_link_libraries(task2 ${OpenCV_LIBS})
@@ -37,5 +39,6 @@ target_link_libraries(task6 ${OpenCV_LIBS})
 target_link_libraries(task7 ${OpenCV_LIBS})
 #target_link_libraries(task8 ${OpenCV_LIBS})
 #target_link_libraries(task9 ${OpenCV_LIBS})
+#target_link_libraries(task11 ${OpenCV_LIBS})
 
 
