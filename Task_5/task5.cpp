@@ -84,7 +84,7 @@ vector<Point> generatePoints_circle(SVGFile& file, unsigned radius, unsigned cou
     vector<Point> points;
     double angle = 2*M_PI / count;
     for (unsigned i = 0; i < count; ++i) {
-        points.push_back({radius * cos(angle * i + 0.1) + center.X, radius * sin(angle*i+0.1) + center.Y});
+        points.push_back({radius * cos(angle * i + 0.01) + center.X, radius * sin(angle*i+0.01) + center.Y});
         file.addCircle(points.back(), 2, true);
     }
 
@@ -161,17 +161,17 @@ void konvexHullJarvis(SVGFile& file, const vector<Point> &points) {
 }
 
 int main() {
-    srand(5);
-    SVGFile fileA("task5A.svg", 1000, 1000);
+    srand(88);
+    /*SVGFile fileA("task5A.svg", 1000, 1000);
     auto lineSegments = generateLineSegments(fileA, 35, 300);
-    detectIntersections(fileA, lineSegments);
+    detectIntersections(fileA, lineSegments);*/
 
-    SVGFile fileB1("task5B-1.svg", 1000, 1000);
-    auto pointsB1 = generatePoints_lattice(fileB1, 100, 300, 700, 300, 700, 0);
+    /*SVGFile fileB1("task5B-1.svg", 1000, 1000);
+    auto pointsB1 = generatePoints_lattice(fileB1, 100, 150, 850, 150, 850, 0);
     triangulate(fileB1, pointsB1, true);
 
     SVGFile fileB0("task5B-0.svg", 1000, 1000);
-    auto pointsB0 = generatePoints_lattice(fileB0, 100, 300, 700, 300, 700, 25);
+    auto pointsB0 = generatePoints_lattice(fileB0, 100, 150, 850,150, 850, 50);
     triangulate(fileB0, pointsB0, true);
 
     SVGFile fileB2("task5B-2.svg", 1000, 1000);
@@ -179,15 +179,15 @@ int main() {
     triangulate(fileB2, pointsB2, true);
 
     SVGFile fileB3("task5B-3.svg", 1000, 1000);
-    auto pointsB3 = generatePoints_circle(fileB3, 500, 40, {500, 500}, true);
-    triangulate(fileB3, pointsB3, true);
+    auto pointsB3 = generatePoints_circle(fileB3, 400, 20, {500, 500}, true);
+    triangulate(fileB3, pointsB3, true);*/
 
     SVGFile fileC1("task5C-1.svg", 1000, 1000);
-    auto pointsC1 = generatePoints_lattice(fileC1, 100, 300, 700, 300, 700, 0);
+    auto pointsC1 = generatePoints_lattice(fileC1, 100, 150, 850, 150, 850, 0);
     konvexHullJarvis(fileC1, pointsC1);
 
     SVGFile fileC0("task5C-0.svg", 1000, 1000);
-    auto pointsC0 = generatePoints_lattice(fileC0, 100, 300, 700, 300, 700, 25);
+    auto pointsC0 = generatePoints_lattice(fileC0, 100, 150, 850, 150, 850, 50);
     konvexHullJarvis(fileC0, pointsC0);
 
     SVGFile fileC2("task5C-2.svg", 1000, 1000);
@@ -195,7 +195,7 @@ int main() {
     konvexHullJarvis(fileC2, pointsC2);
 
     SVGFile fileC3("task5C-3.svg", 1000, 1000);
-    auto pointsC3 = generatePoints_circle(fileC3, 500, 15, {500, 500}, true);
+    auto pointsC3 = generatePoints_circle(fileC3, 400, 15, {500, 500}, true);
     konvexHullJarvis(fileC3, pointsC3);
 
     return 0;
