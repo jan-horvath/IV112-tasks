@@ -37,7 +37,7 @@ target_link_libraries(task4 ${OpenCV_LIBS})
 #target_link_libraries(task5 ${OpenCV_LIBS})
 target_link_libraries(task6 ${OpenCV_LIBS})
 target_link_libraries(task7 ${OpenCV_LIBS})
-#target_link_libraries(task8 ${OpenCV_LIBS})
+target_link_libraries(task8 ${OpenCV_LIBS})
 #target_link_libraries(task9 ${OpenCV_LIBS})
 #target_link_libraries(task11 ${OpenCV_LIBS})
 

@@ -180,7 +180,6 @@ int main() {
     lSystem4.m_turtle.drawing(true);
 
     string str4 = lSystem4.translate("A", 8);
-    cout << str4 << endl;
     lSystem4.drawString(str4);*/
 
     /*LSystem lSystem5("task6C5.svg", 1440, 1440);

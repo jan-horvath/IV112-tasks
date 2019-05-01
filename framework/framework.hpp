@@ -24,8 +24,6 @@ namespace svg {
     double toRad(double degrees) {return M_PI/180 * degrees;}
     double toDeg(double radians) { return 180/M_PI * radians;}
 
-    struct Object;
-
     struct Matrix {
         vector<double> _d;
         size_t _rows;
@@ -244,7 +242,7 @@ namespace svg {
         }
     };
 
-    struct Object {
+    /*struct Object {
         vector<LineSegment> segments;
         LineSegment basisVectorA;
         LineSegment basisVectorB;
@@ -270,23 +268,19 @@ namespace svg {
             return Matrix::scaling(X, Y, c.X, c.Y);
         }
 
-    };
+    };*/
 
     inline LineSegment transformLine(LineSegment ls, const Matrix& trans) {
         ls.applyTransformation(trans);
         return ls;
     }
 
-    Object transformObject(const Object& obj, const Matrix& trans) {
-        Object transformedObject;
-        transformedObject.segments.reserve(obj.segments.size());
-        for (const auto& ls : obj.segments) {
-            transformedObject.segments.emplace_back(transformLine(ls, trans));
+    vector<LineSegment> transformObject(const vector<LineSegment>& obj, const Matrix& trans) {
+        vector<LineSegment> transformedObject;
+        transformedObject.reserve(obj.size());
+        for (const auto& ls : obj) {
+            transformedObject.emplace_back(transformLine(ls, trans));
         }
-
-        transformedObject.basisVectorA = transformLine(obj.basisVectorA, trans);
-        transformedObject.basisVectorB = transformLine(obj.basisVectorB, trans);
-
         return move(transformedObject);
     }
 
@@ -374,8 +368,8 @@ namespace svg {
                     << "\" />" << endl;
         }
 
-        void addObject(const Object &object, const string& col = COLORS[0]) {
-            for (const LineSegment& ls : object.segments) {
+        void addObject(const vector<LineSegment> &object, const string& col = COLORS[0]) {
+            for (const LineSegment& ls : object) {
                 addLine(ls.P1, ls.P2, col);
             }
         }

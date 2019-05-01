@@ -2,8 +2,10 @@
 #include <fstream>
 #include <vector>
 #include <iomanip>
+#include "../framework/framework.hpp"
 
 using namespace std;
+using namespace svg;
 const unsigned A = 0;
 const unsigned B = 1;
 
@@ -18,7 +20,6 @@ void girlBoySimulation(unsigned families) {
 
     cout << "For " << families << " families (boys), the number of girls is "
     << girls << " ("  << 100*(double)girls/(boys+girls) << "%)" << endl;
-    return;
 }
 
 void randomBreakdown(unsigned fileNum) {
@@ -53,11 +54,10 @@ void randomBreakdown(unsigned fileNum) {
 }
 
 //TODO Make it nicer
-template <unsigned DICE>
-unsigned throwDice() {
+unsigned throwDice(unsigned diceIdx) {
     unsigned n = (rand() % 21) + 1;
-    if (DICE > 1) {DICE = rand() % 2;}
-    if (DICE == 0) {
+    if (diceIdx > 1) {diceIdx = rand() % 2;}
+    if (diceIdx == 0) {
         if (n == 1) return 1;
         if (n <= 3) return 2;
         if (n <= 6) return 3;
@@ -74,21 +74,60 @@ unsigned throwDice() {
     }
 }
 
-template <unsigned DICE>
-double nThrowAverage(unsigned n) {
+double nThrowAverage(unsigned n, unsigned diceIdx) {
     double sum = 0.0;
     for (unsigned i = 0; i < n; ++i) {
-        sum += throwDice<DICE>();
+        sum += throwDice(diceIdx);
     }
     return sum/n;
 };
+
+vector<double> CLT_Test(unsigned k, unsigned n, unsigned testNumber) {
+    vector<double> output;
+    output.reserve(k);
+    for (unsigned i = 0; i < k; ++i) {
+        double average = 0.0;
+        if (testNumber == 1) {
+            average = nThrowAverage(n, 0);
+        }
+        if (testNumber == 2) {
+            average = nThrowAverage(n, 2);
+        }
+        if (testNumber == 3) {
+            average = nThrowAverage(n, rand() % 2);
+        }
+        output.push_back(average);
+    }
+    return move(output);
+}
+
+void plot_CLT_Test(svg::SVGFile &file, vector<double> &CLT_Test_Output, double groupSize) {
+    double min = 1.0;
+    double max = 6.0;
+
+    sort(CLT_Test_Output.begin(), CLT_Test_Output.end());
+    double currentGroupThreshold = min + groupSize;
+    unsigned currentGroupSize = 0;
+    for (unsigned i = 0; i < CLT_Test_Output.size(); ++i) {
+        if (CLT_Test_Output[i] < currentGroupThreshold) {
+            ++currentGroupSize;
+        } else {
+            svg::Point A((currentGroupThreshold - groupSize/2 - 1) * file.m_width/(max - min), file.m_height * 0.9);
+            svg::Point B((currentGroupThreshold - groupSize/2 - 1) * file.m_width/(max - min), file.m_height * 0.9 - currentGroupSize);
+            file.addLine(A, B);
+
+            currentGroupSize = 0;
+            currentGroupThreshold += groupSize;
+            --i;
+        }
+    }
+}
 
 template <unsigned DICE>
 unsigned throwPossiblyFakeDice() {
     //TODO finish
 }
 
-// TODO create n-k thrower which outputs vector<double> for the plot function
 // TODO plot in svg: plot(vector<double>) {sort, group together and draw line upward}
 
 int main() {
@@ -100,6 +139,8 @@ int main() {
     //randomBreakdown(5); // 2 is most likely followed by 5, 5 by 3, 3 by 4, 4 by 1, 1 by 6, 6 by 2
     //randomBreakdown(); 3,6,7
 
+
+    auto test1 = CLT_Test(1, 10, 1);
 
 
     return 0;
