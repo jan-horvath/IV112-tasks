@@ -102,25 +102,27 @@ vector<double> CLT_Test(unsigned k, unsigned n, unsigned testNumber) {
 }
 
 void plot_CLT_Test(svg::SVGFile &file, vector<double> &CLT_Test_Output, double groupSize) {
-    double min = 1.0;
-    double max = 6.0;
+    double min = 0.0;
+    double max = 7.0;
 
     sort(CLT_Test_Output.begin(), CLT_Test_Output.end());
     double currentGroupThreshold = min + groupSize;
     unsigned currentGroupSize = 0;
-    for (unsigned i = 0; i < CLT_Test_Output.size(); ++i) {
-        if (CLT_Test_Output[i] < currentGroupThreshold) {
+    for (unsigned i = 0; i <= CLT_Test_Output.size(); ++i) {
+        if ((i != CLT_Test_Output.size()) && (CLT_Test_Output[i] < currentGroupThreshold)) {
             ++currentGroupSize;
         } else {
-            svg::Point A((currentGroupThreshold - groupSize/2 - 1) * file.m_width/(max - min), file.m_height * 0.9);
-            svg::Point B((currentGroupThreshold - groupSize/2 - 1) * file.m_width/(max - min), file.m_height * 0.9 - currentGroupSize);
+            svg::Point A((currentGroupThreshold - groupSize/2) * file.m_width/(max - min), file.m_height * 0.9);
+            svg::Point B(A.X, file.m_height * 0.9 - currentGroupSize);
             file.addLine(A, B);
 
             currentGroupSize = 0;
             currentGroupThreshold += groupSize;
+            if (i == CLT_Test_Output.size()) break;
             --i;
         }
     }
+    file.addLabels();
 }
 
 template <unsigned DICE>
@@ -139,8 +141,10 @@ int main() {
     //randomBreakdown(5); // 2 is most likely followed by 5, 5 by 3, 3 by 4, 4 by 1, 1 by 6, 6 by 2
     //randomBreakdown(); 3,6,7
 
+    SVGFile test1_plot("plot1.svg", 1000, 1000);
+    auto test1 = CLT_Test(5000, 1000, 1);
+    plot_CLT_Test(test1_plot, test1, 0.02);
 
-    auto test1 = CLT_Test(1, 10, 1);
 
 
     return 0;
