@@ -54,7 +54,7 @@ void randomBreakdown(unsigned fileNum) {
 }
 
 //TODO Make it nicer
-unsigned throwDice(unsigned diceIdx) {
+unsigned throwDie(unsigned diceIdx) {
     unsigned n = (rand() % 21) + 1;
     if (diceIdx > 1) {diceIdx = rand() % 2;}
     if (diceIdx == 0) {
@@ -77,7 +77,7 @@ unsigned throwDice(unsigned diceIdx) {
 double nThrowAverage(unsigned n, unsigned diceIdx) {
     double sum = 0.0;
     for (unsigned i = 0; i < n; ++i) {
-        sum += throwDice(diceIdx);
+        sum += throwDie(diceIdx);
     }
     return sum/n;
 };
@@ -113,7 +113,7 @@ void plot_CLT_Test(svg::SVGFile &file, vector<double> &CLT_Test_Output, double g
             ++currentGroupSize;
         } else {
             svg::Point A((currentGroupThreshold - groupSize/2) * file.m_width/(max - min), file.m_height * 0.9);
-            svg::Point B(A.X, file.m_height * 0.9 - currentGroupSize);
+            svg::Point B(A.X, file.m_height * 0.9 - currentGroupSize*0.25);
             file.addLine(A, B);
 
             currentGroupSize = 0;
@@ -125,15 +125,26 @@ void plot_CLT_Test(svg::SVGFile &file, vector<double> &CLT_Test_Output, double g
     file.addLabels();
 }
 
-template <unsigned DICE>
-unsigned throwPossiblyFakeDice() {
-    //TODO finish
+//N = 10, X = 5 (<1%)
+//N = 100, X = 3 (<30%)
+//N = 1000, X = 5 (<15%)
+//N = 216, X = 3 (~50%)
+
+unsigned throwDie(bool fake) {
+    if (!fake) return (rand() % 6) + 1;
+    return 6;
 }
 
-// TODO plot in svg: plot(vector<double>) {sort, group together and draw line upward}
+void fakeDieSimulation(unsigned N, unsigned K, unsigned iterations) {
+
+    for (unsigned i = 0; i < iterations; ++i) {
+
+    }
+
+}
 
 int main() {
-    srand(35);
+    srand(4);
     //girlBoySimulation(10000000);
     //randomBreakdown(1); //write permutations of 6
     //randomBreakdown(2); //whenever a 2 is generated, replace it with 5 with 50% probability
@@ -141,9 +152,17 @@ int main() {
     //randomBreakdown(5); // 2 is most likely followed by 5, 5 by 3, 3 by 4, 4 by 1, 1 by 6, 6 by 2
     //randomBreakdown(); 3,6,7
 
-    SVGFile test1_plot("plot1.svg", 1000, 1000);
-    auto test1 = CLT_Test(5000, 1000, 1);
-    plot_CLT_Test(test1_plot, test1, 0.02);
+    /*SVGFile test1_plot("plot1.svg", 1000, 1000);
+    auto test1 = CLT_Test(30000, 100, 1);
+    plot_CLT_Test(test1_plot, test1, 0.03);
+
+    SVGFile test2_plot("plot2.svg", 1000, 1000);
+    auto test2 = CLT_Test(30000, 100, 2);
+    plot_CLT_Test(test2_plot, test2, 0.03);
+
+    SVGFile test3_plot("plot3.svg", 1000, 1000);
+    auto test3 = CLT_Test(30000, 100, 3);
+    plot_CLT_Test(test3_plot, test3, 0.03);*/
 
 
 

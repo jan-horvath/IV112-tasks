@@ -375,12 +375,12 @@ namespace svg {
         }
 
         void addLabels() {
-            m_file << "   <text x=\"" << 132 << "\" y=\"" << 960 << "\" font-family=\"sans-serif\" font-size=\"" << 40 << "px\" fill=\"red\">1</text>";
-            m_file << "   <text x=\"" << 275 << "\" y=\"" << 960 << "\" font-family=\"sans-serif\" font-size=\"" << 40 << "px\" fill=\"red\">2</text>";
-            m_file << "   <text x=\"" << 417 << "\" y=\"" << 960 << "\" font-family=\"sans-serif\" font-size=\"" << 40 << "px\" fill=\"red\">3</text>";
-            m_file << "   <text x=\"" << 560 << "\" y=\"" << 960 << "\" font-family=\"sans-serif\" font-size=\"" << 40 << "px\" fill=\"red\">4</text>";
-            m_file << "   <text x=\"" << 703 << "\" y=\"" << 960 << "\" font-family=\"sans-serif\" font-size=\"" << 40 << "px\" fill=\"red\">5</text>";
-            m_file << "   <text x=\"" << 845 << "\" y=\"" << 960 << "\" font-family=\"sans-serif\" font-size=\"" << 40 << "px\" fill=\"red\">6</text>";
+            m_file << "   <text x=\"" << 132 << "\" y=\"" << 960 << "\" font-family=\"sans-serif\" font-size=\"" << 40 << "px\" fill=\"red\">1</text>\n";
+            m_file << "   <text x=\"" << 275 << "\" y=\"" << 960 << "\" font-family=\"sans-serif\" font-size=\"" << 40 << "px\" fill=\"red\">2</text>\n";
+            m_file << "   <text x=\"" << 417 << "\" y=\"" << 960 << "\" font-family=\"sans-serif\" font-size=\"" << 40 << "px\" fill=\"red\">3</text>\n";
+            m_file << "   <text x=\"" << 560 << "\" y=\"" << 960 << "\" font-family=\"sans-serif\" font-size=\"" << 40 << "px\" fill=\"red\">4</text>\n";
+            m_file << "   <text x=\"" << 703 << "\" y=\"" << 960 << "\" font-family=\"sans-serif\" font-size=\"" << 40 << "px\" fill=\"red\">5</text>\n";
+            m_file << "   <text x=\"" << 845 << "\" y=\"" << 960 << "\" font-family=\"sans-serif\" font-size=\"" << 40 << "px\" fill=\"red\">6</text>\n";
         }
 
         ~SVGFile() {
