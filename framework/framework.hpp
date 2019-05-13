@@ -1,3 +1,5 @@
+#ifndef IV112_TASKS_FRAMEWORK
+#define IV112_TASKS_FRAMEWORK
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -513,3 +515,5 @@ namespace svg {
         map<char, function<void()>> m_drawingRules;
     };
 };
+
+#endif //IV112_TASKS_FRAMEWORK
