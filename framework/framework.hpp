@@ -244,34 +244,6 @@ namespace svg {
         }
     };
 
-    /*struct Object {
-        vector<LineSegment> segments;
-        LineSegment basisVectorA;
-        LineSegment basisVectorB;
-
-        Point center() const {
-            return {basisVectorA.P1.X + 0.5*(basisVectorA.P2.X - basisVectorA.P1.X) + 0.5*(basisVectorB.P2.X - basisVectorB.P1.X),
-                    basisVectorA.P1.Y + 0.5*(basisVectorA.P2.Y - basisVectorA.P1.Y) + 0.5*(basisVectorB.P2.Y - basisVectorB.P1.Y)};
-        }
-
-        Matrix translationMatrix(double Amult, double Bmult) const {
-            double X = Amult * basisVectorA.getVec().X + Bmult * basisVectorB.getVec().X;
-            double Y = Amult * basisVectorA.getVec().Y + Bmult * basisVectorB.getVec().Y;
-            return move(Matrix::translation(X, Y));
-        }
-
-        Matrix rotationMatrix(double alpha) const {
-            auto c = center();
-            return Matrix::rotation(alpha, c.X, c.Y);
-        }
-
-        Matrix scalingMatrix(double X, double Y) const {
-            auto c = center();
-            return Matrix::scaling(X, Y, c.X, c.Y);
-        }
-
-    };*/
-
     inline LineSegment transformLine(LineSegment ls, const Matrix& trans) {
         ls.applyTransformation(trans);
         return ls;
