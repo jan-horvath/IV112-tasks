@@ -23,14 +23,15 @@ vector<Point> generateClusters(SVGFile &file, unsigned clusterCount, unsigned cl
         double sigmaX = generateNumber(0.01, 0.1, 10);
         double sigmaY = generateNumber(0.01, 0.1, 10);
 
-        std::mt19937 gen{500};
+        std::mt19937 genX{500};
+        std::mt19937 genY{5000};
         std::normal_distribution<> ND_X{muX, sigmaX};
         std::normal_distribution<> ND_Y{muY, sigmaY};
 
         unsigned pointCount = generateNumber(clusterSizeMin, clusterSizeMax, clusterSizeMax-clusterSizeMin);
 
         for (unsigned j = 0; j < pointCount; ++j) {
-            points.emplace_back(Point(ND_X(gen), ND_Y(gen)));
+            points.emplace_back(Point(ND_X(genX), ND_Y(genY)));
         }
     }
     for (const auto& point : points) {
@@ -97,24 +98,76 @@ pair<double, double> gradientDescend(SVGFile &file, const vector<Point>& points,
     return pair;
 }
 
-void kmeans(SVGFile& file, vector<Point> points, unsigned count) {
-    unsigned changing = count;
-    vector<vector<Point>> clusters(count, vector<Point>());
-    while (changing != 0) {
-        changing = count;
-        for (unsigned i = 0; i < count; ++i) {
-            
+vector<Point> generateRandomPoints(unsigned count) {
+    vector<Point> points;
+    points.reserve(count);
+    for (unsigned i = 0; i < count; ++i) {
+        double X = generateNumber(-1, 1, 50);
+        double Y = generateNumber(-1, 1, 50);
+        points.emplace_back(Point(X,Y));
+    }
+}
+
+unsigned getClosestCluster(const Point &p, const vector<Point> &clusterCenters) {
+    unsigned closest = -1;
+    double distance = numeric_limits<double>::max();
+    for (unsigned i = 0; i < clusterCenters.size(); ++i) {
+        double currentDistance = (p - clusterCenters[i]).getLength();
+        if (currentDistance < distance) {
+            closest = i;
+            distance = currentDistance;
         }
+    }
+    return closest;
+}
+
+vector<Point> updateClusterCenters(const vector<Point>& points, const vector<unsigned>& clusterAssignments, unsigned count) {
+    vector<Point> newCenters(count, {0.0, 0.0});
+    vector<unsigned> closestPointsCount(count, 0);
+    for (unsigned i = 0; i < points.size(); ++i) {
+        unsigned CA = clusterAssignments[i];
+        newCenters[CA].X += points[i].X;
+        newCenters[CA].Y += points[i].Y;
+        ++closestPointsCount[CA];
+    }
+    return move(newCenters);
+}
+
+void kmeans(SVGFile& file, const vector<Point> &points, unsigned count) {
+    bool changing;
+    vector<unsigned> clusterAssignments(points.size(), 0);
+    vector<Point> clusterCenters = generateRandomPoints(count);
+    do {
+        changing = false;
+        for (unsigned i = 0; i < points.size(); ++i) {
+            unsigned closest = getClosestCluster(points[i], clusterCenters);
+            if (closest != clusterAssignments[i]) {
+                changing = true;
+                clusterAssignments[i] = closest;
+            }
+        }
+        if (changing) {
+            clusterCenters = updateClusterCenters(points, clusterAssignments, count);
+        }
+
+    } while (changing);
+
+    for (unsigned i = 0; i < points.size(); ++i) {
+        file.addCircle({points[i].X, -points[i].Y}, 2, true, COLORS[clusterAssignments[i]], true);
     }
 }
 
 int main() {
-    srand(527);
+    srand(5299);
 
-    SVGFile fileA("lin_reg.svg", 1000, 1000);
+    /*SVGFile fileA("lin_reg.svg", 1000, 1000);
     vector<Point> pointsA = generateLinePoints(fileA, 0.75, 0.4, 0.05, 100);
     auto pairA = gradientDescend(fileA, pointsA, 0.005, 100);//analyticSolution(fileA, pointsA);//
-    //drawLine(fileA, pairA, COLORS[3]);
-    cout << "y = " << pairA.first << "x + " << pairA.second << endl;
+    cout << "y = " << pairA.first << "x + " << pairA.second << endl;*/
+
+    SVGFile fileB("clustering.svg", 1000, 1000);
+    vector<Point> pointsB = generateClusters(fileB, 8, 20, 40);
+    kmeans(fileB, pointsB, 8);
+
     return 0;
 }
