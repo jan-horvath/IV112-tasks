@@ -35,7 +35,7 @@ vector<Point> generateClusters(SVGFile &file, unsigned clusterCount, unsigned cl
         }
     }
     for (const auto& point : points) {
-        file.addCircle(point, 2, true, COLORS[0], true);
+        file.addCircle({point.X, -point.Y}, 2, true, COLORS[0], true);
     }
     return move(points);
 }
@@ -106,6 +106,7 @@ vector<Point> generateRandomPoints(unsigned count) {
         double Y = generateNumber(-1, 1, 50);
         points.emplace_back(Point(X,Y));
     }
+    return move(points);
 }
 
 unsigned getClosestCluster(const Point &p, const vector<Point> &clusterCenters) {
@@ -121,7 +122,10 @@ unsigned getClosestCluster(const Point &p, const vector<Point> &clusterCenters) 
     return closest;
 }
 
-vector<Point> updateClusterCenters(const vector<Point>& points, const vector<unsigned>& clusterAssignments, unsigned count) {
+void updateClusterCenters(const vector<Point>& points,
+                                   const vector<unsigned>& clusterAssignments,
+                                   vector<Point>& centers) {
+    unsigned count = centers.size();
     vector<Point> newCenters(count, {0.0, 0.0});
     vector<unsigned> closestPointsCount(count, 0);
     for (unsigned i = 0; i < points.size(); ++i) {
@@ -130,12 +134,20 @@ vector<Point> updateClusterCenters(const vector<Point>& points, const vector<uns
         newCenters[CA].Y += points[i].Y;
         ++closestPointsCount[CA];
     }
-    return move(newCenters);
+
+    for (unsigned i = 0; i < count; ++i) {
+        unsigned cpc = closestPointsCount[i];
+        if (cpc != 0) {
+            centers[i].X = newCenters[i].X / cpc;
+            centers[i].Y = newCenters[i].Y / cpc;
+        }
+    }
 }
 
 void kmeans(SVGFile& file, const vector<Point> &points, unsigned count) {
     bool changing;
     vector<unsigned> clusterAssignments(points.size(), 0);
+    srand(200);
     vector<Point> clusterCenters = generateRandomPoints(count);
     do {
         changing = false;
@@ -147,18 +159,29 @@ void kmeans(SVGFile& file, const vector<Point> &points, unsigned count) {
             }
         }
         if (changing) {
-            clusterCenters = updateClusterCenters(points, clusterAssignments, count);
+            updateClusterCenters(points, clusterAssignments, clusterCenters);
+        }
+
+        SVGFile fileTMP("filetmp.svg", 1000, 1000);
+        for (unsigned i = 0; i < points.size(); ++i) {
+            fileTMP.addCircle({points[i].X, -points[i].Y}, 2, true, COLORS[clusterAssignments[i]+1], true);
+        }
+        for (unsigned i = 0; i < clusterCenters.size(); ++i) {
+            fileTMP.addCircle({clusterCenters[i].X, -clusterCenters[i].Y}, 5, true, COLORS[i+1], true);
         }
 
     } while (changing);
 
     for (unsigned i = 0; i < points.size(); ++i) {
-        file.addCircle({points[i].X, -points[i].Y}, 2, true, COLORS[clusterAssignments[i]], true);
+        file.addCircle({points[i].X, -points[i].Y}, 2, true, COLORS[clusterAssignments[i]+1], true);
+    }
+    for (unsigned i = 0; i < clusterCenters.size(); ++i) {
+        file.addCircle({clusterCenters[i].X, -clusterCenters[i].Y}, 5, true, COLORS[i+1], true);
     }
 }
 
 int main() {
-    srand(5299);
+    srand(500);
 
     /*SVGFile fileA("lin_reg.svg", 1000, 1000);
     vector<Point> pointsA = generateLinePoints(fileA, 0.75, 0.4, 0.05, 100);
@@ -166,8 +189,7 @@ int main() {
     cout << "y = " << pairA.first << "x + " << pairA.second << endl;*/
 
     SVGFile fileB("clustering.svg", 1000, 1000);
-    vector<Point> pointsB = generateClusters(fileB, 8, 20, 40);
-    kmeans(fileB, pointsB, 8);
-
+    vector<Point> pointsB = generateClusters(fileB, 10, 100, 200);
+    kmeans(fileB, pointsB, 10);
     return 0;
 }
