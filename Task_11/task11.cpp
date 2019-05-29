@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#include <iomanip>
 #include "../framework/framework.hpp"
 
 using namespace std;
@@ -15,7 +16,19 @@ void drawLine(SVGFile& file, pair<double, double> line, const string &color = CO
     file.addLine({-2, -Y1}, {2, -Y2}, color, true);
 }
 
-vector<Point> generateClusters(SVGFile &file, unsigned clusterCount, unsigned clusterSizeMin, unsigned clusterSizeMax) {
+vector<Point> readPointsFromFile(const string& filename, double xmin, double xmax, double ymin, double ymax) {
+    vector<Point> output;
+    ifstream fs(filename);
+    double X, Y;
+    while (fs >> X >> Y) {
+        X = 2*(X - xmin)/(xmax - xmin) - 1;
+        Y = 2*(Y-ymin)/(ymax - ymin) - 1;
+        output.emplace_back(Point(X, Y));
+    }
+    return move(output);
+}
+
+vector<Point> generateClusters(unsigned clusterCount, unsigned clusterSizeMin, unsigned clusterSizeMax) {
     vector<Point> points;
     for (unsigned i = 0; i < clusterCount; ++i) {
         double muX = generateNumber(-0.9, 0.9, 32);
@@ -34,15 +47,13 @@ vector<Point> generateClusters(SVGFile &file, unsigned clusterCount, unsigned cl
             points.emplace_back(Point(ND_X(genX), ND_Y(genY)));
         }
     }
-    for (const auto& point : points) {
-        file.addCircle({point.X, -point.Y}, 2, true, COLORS[0], true);
-    }
     return move(points);
 }
 
 vector<Point>generateLinePoints(SVGFile &file, double a, double b, double sigmaY, unsigned pointCount) {
     vector<Point> points;
-    std::mt19937 gen{2222};
+    int r = rand();
+    std::mt19937 gen{r};
     std::normal_distribution<> ND_Y{0, sigmaY};
 
     for  (unsigned i = 0; i < pointCount; ++i) {
@@ -72,7 +83,7 @@ pair<double, double> analyticSolution(SVGFile &file, const vector<Point> &points
 
     double a = (n*XY-X*Y)/(n*X2-X*X);
 
-    drawLine(file, make_pair(a, Y/n - a*X/n));
+    drawLine(file, make_pair(a, Y/n - a*X/n), COLORS[3]);
     return make_pair(a, Y/n - a*X/n);;
 }
 
@@ -87,9 +98,9 @@ pair<double, double> gradientDescend(SVGFile &file, const vector<Point>& points,
             db -= p.Y - a*p.X - b;
         }
 
-        a -= da*learningRate;
-        b -= db*learningRate;
-        drawLine(file, make_pair(a, b));
+        a -= da*learningRate/points.size();
+        b -= db*learningRate/points.size();
+        if (i % 20 == 0) drawLine(file, make_pair(a, b));
         da = 0.0;
         db = 0.0;
     }
@@ -144,11 +155,11 @@ void updateClusterCenters(const vector<Point>& points,
     }
 }
 
-void kmeans(SVGFile& file, const vector<Point> &points, unsigned count) {
+void kmeans(const string& filename, const vector<Point> &points, unsigned count) {
     bool changing;
     vector<unsigned> clusterAssignments(points.size(), 0);
-    srand(200);
     vector<Point> clusterCenters = generateRandomPoints(count);
+    unsigned iter = 0;
     do {
         changing = false;
         for (unsigned i = 0; i < points.size(); ++i) {
@@ -158,38 +169,101 @@ void kmeans(SVGFile& file, const vector<Point> &points, unsigned count) {
                 clusterAssignments[i] = closest;
             }
         }
+
+        SVGFile file(filename + to_string(iter) + ".svg", 1000, 1000);
+        for (unsigned i = 0; i < points.size(); ++i) {
+            file.addCircle({points[i].X, -points[i].Y}, 2, true, COLORS[clusterAssignments[i]+1], true);
+        }
+        for (unsigned i = 0; i < clusterCenters.size(); ++i) {
+            file.addCircle({clusterCenters[i].X, -clusterCenters[i].Y}, 5, true, COLORS[i+1], true);
+        }
+
         if (changing) {
             updateClusterCenters(points, clusterAssignments, clusterCenters);
         }
 
-        SVGFile fileTMP("filetmp.svg", 1000, 1000);
-        for (unsigned i = 0; i < points.size(); ++i) {
-            fileTMP.addCircle({points[i].X, -points[i].Y}, 2, true, COLORS[clusterAssignments[i]+1], true);
-        }
-        for (unsigned i = 0; i < clusterCenters.size(); ++i) {
-            fileTMP.addCircle({clusterCenters[i].X, -clusterCenters[i].Y}, 5, true, COLORS[i+1], true);
-        }
+        ++iter;
 
     } while (changing);
-
-    for (unsigned i = 0; i < points.size(); ++i) {
-        file.addCircle({points[i].X, -points[i].Y}, 2, true, COLORS[clusterAssignments[i]+1], true);
-    }
-    for (unsigned i = 0; i < clusterCenters.size(); ++i) {
-        file.addCircle({clusterCenters[i].X, -clusterCenters[i].Y}, 5, true, COLORS[i+1], true);
-    }
 }
 
 int main() {
-    srand(500);
+    srand(400);
 
-    /*SVGFile fileA("lin_reg.svg", 1000, 1000);
-    vector<Point> pointsA = generateLinePoints(fileA, 0.75, 0.4, 0.05, 100);
-    auto pairA = gradientDescend(fileA, pointsA, 0.005, 100);//analyticSolution(fileA, pointsA);//
-    cout << "y = " << pairA.first << "x + " << pairA.second << endl;*/
+    /*SVGFile linreg_file("linreg.svg", 1000, 1000);
+    vector<Point> linreg_points = readPointsFromFile("linreg.txt", -4.0, 7.5, -4.0, 7.5);
+    for (const Point& p: linreg_points) {linreg_file.addCircle({p.X, -p.Y}, 2, true, COLORS[0], true);}
+    auto analyticPair = analyticSolution(linreg_file, linreg_points);
+    auto gradPair = gradientDescend(linreg_file, linreg_points, 0.05, 2000);
+    cout << "Analytic: y = " << analyticPair.first << "x + " << analyticPair.second
+         << "     Gradient: y = " << gradPair.first << "x + " << gradPair.second << endl;
 
-    SVGFile fileB("clustering.svg", 1000, 1000);
-    vector<Point> pointsB = generateClusters(fileB, 10, 100, 200);
-    kmeans(fileB, pointsB, 10);
+    vector<Point> faithful_points = readPointsFromFile("faithful.txt", 1.0, 6.0, 40.0, 100);
+    string filename = "Task_11_results/Clustering/faithful";
+    kmeans(filename, faithful_points, 3);*/
+
+    //amount of points
+
+    for (unsigned i = 0; i < 20; ++i) {
+        SVGFile fileA("Task_11_results/lin_reg_point_count" + to_string(i) + ".svg", 1000, 1000);
+        vector<Point> pointsA = generateLinePoints(fileA, 0.75, 0.4, 0.1, (i+1)*20);
+        auto analyticPair = analyticSolution(fileA, pointsA);
+        auto gradPair = gradientDescend(fileA, pointsA, 0.05, 350);
+        cout << "Point count = " << (i+1)*20
+             << "     Analytic: y = " << analyticPair.first << "x + " << analyticPair.second
+             << "     Gradient: y = " << gradPair.first << "x + " << gradPair.second << endl;
+    }
+
+
+    //noise
+/*
+    for (unsigned i = 0; i < 20; ++i) {
+        srand(i * 128);
+        SVGFile fileA("Task_11_results/lin_reg_noise" + to_string(i) + ".svg", 1000, 1000);
+        vector<Point> pointsA = generateLinePoints(fileA, -0.75, 0.4, 0.05 + 0.02*i, 100);
+        auto analyticPair = analyticSolution(fileA, pointsA);
+        auto gradPair = gradientDescend(fileA, pointsA, 0.05, 400);
+        cout << "Noise = " << 0.05 + 0.02*i
+             << "     Analytic: y = " << analyticPair.first << "x + " << analyticPair.second
+             << "     Gradient: y = " << gradPair.first << "x + " << gradPair.second << endl;
+    }
+*/
+
+    //outliers
+    /*
+    for (unsigned i = 0; i < 20; ++i) {
+        SVGFile fileA("Task_11_results/lin_reg_outliers" + to_string(i) + ".svg", 1000, 1000);
+        vector<Point> pointsA = generateLinePoints(fileA, 0.2, 0.0, 0.1, 100);
+        vector<Point> outliers = generateLinePoints(fileA, 0.2, 0.4, 0.2, i+1);
+        pointsA.insert(pointsA.end(), outliers.begin(), outliers.end());
+        auto analyticPair = analyticSolution(fileA, pointsA);
+        auto gradPair = gradientDescend(fileA, pointsA, 0.05, 400);
+        cout << setprecision(4)
+             << "Outliers = " << i+1
+             << "     Analytic: y = " << analyticPair.first << "x + " << analyticPair.second
+             << "     Gradient: y = " << gradPair.first << "x + " << gradPair.second << endl;
+    }*/
+
+
+    srand(498);
+    //cluster count
+    /*
+    for (unsigned i = 0; i < 5; ++i) {
+        vector<Point> pointsB = generateClusters(3*(i+1), 25, 50);
+        string filename = "Task_11_results/Clustering/cluster_count";
+        filename.push_back('A' + i);
+        kmeans(filename, pointsB, 3*(i+1));
+    }*/
+
+    /*for (unsigned i = 0; i < 5; ++i) {
+        vector<Point> pointsB = generateClusters(8, 25, 50);
+        string filename = "Task_11_results/Clustering/cluster_assignment";
+        filename.push_back('A' + i);
+        kmeans(filename, pointsB, 4+2*i);
+    }*/
+
+
+
+
     return 0;
 }
