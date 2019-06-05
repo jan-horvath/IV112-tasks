@@ -52,7 +52,8 @@ namespace Labyrinth {
         }
     public:
         vector<vector<Cell*>> Dijkstra(const Coords& p_from, const Coords& p_to) {
-            priority_queue<Cell*, vector<Cell*>, decltype(&hasGreaterSpl)> pq(hasGreaterSpl);
+            //priority_queue<Cell*, vector<Cell*>, decltype(&hasGreaterSpl)> pq(hasGreaterSpl);
+            vector<Cell*> pq;
             unsigned umaxhalf = numeric_limits<unsigned>::max()/2;
 
             for (auto& row : m_cells) {
@@ -61,33 +62,42 @@ namespace Labyrinth {
                         cell.m_spl = umaxhalf;
                         cell.m_prev.clear();
                         cell.m_processed = false;
-                        pq.push(&cell);
+                        //pq.push_(&cell);
+                        pq.push_back(&cell);
                     }
                 }
             }
 
             Cell* current = &getCell(p_from);
             current->m_spl = 0;
+            make_heap(pq.begin(), pq.end(), &hasGreaterSpl);
+            pop_heap(pq.begin(), pq.end(), &hasGreaterSpl);
+            pq.pop_back();
 
             while (current->m_idx != p_to) {
-                if (!current->m_processed) {
-                    for (const auto &edge : current->m_out) {
-                        if (edge.first->m_spl == current->m_spl + edge.second) {
-                            edge.first->m_prev.push_back(current);
-                        }
-
-                        if (edge.first->m_spl > current->m_spl + edge.second) {
-                            edge.first->m_spl = current->m_spl + edge.second;
-                            edge.first->m_prev.clear();
-                            edge.first->m_prev.push_back(current);
-                            pq.push(edge.first);
-                        }
+                //if (!current->m_processed) {
+                for (const auto &edge : current->m_out) {
+                    if (edge.first->m_spl == current->m_spl + edge.second) {
+                        edge.first->m_prev.push_back(current);
                     }
 
+                    if (edge.first->m_spl > current->m_spl + edge.second) {
+                        edge.first->m_spl = current->m_spl + edge.second;
+                        edge.first->m_prev.clear();
+                        edge.first->m_prev.push_back(current);
+                        //pq.push(edge.first); //insted of decrease-key we add the pointer again but with new m_spl value
+                        make_heap(pq.begin(), pq.end(), &hasGreaterSpl);
+                    }
                 }
-                current->m_processed = true;
-                current = pq.top();
-                pq.pop();
+
+                //}
+                //current->m_processed = true;
+                //current = pq.top(); //extract min (look at min item)
+                current = pq.front();
+                //pq.pop(); //remove the min item
+                pop_heap(pq.begin(), pq.end(), &hasGreaterSpl);
+                pq.pop_back();
+
                 auto b1 = current->m_idx != p_to;
                 auto b2 = current->m_spl == umaxhalf;
             }

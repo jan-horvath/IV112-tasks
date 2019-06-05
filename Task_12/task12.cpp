@@ -40,10 +40,9 @@ int main() {
         "     ",
         " ###   ",
         "  ##    ",
-        "#  #    ",
+        "#  #   ",
         "##   "
     });
-    cout << "hi";
     auto shortestPaths = rg.Dijkstra(make_tuple(0,0,1), make_tuple(3,4,1));
     //auto shortestPaths = rg.Dijkstra(make_tuple(0,0,1), make_tuple(3,0,1));
     rg.drawLabyrinth(file, shortestPaths);
