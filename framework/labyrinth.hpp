@@ -108,7 +108,7 @@ namespace Labyrinth {
             return move(output);
         }
 
-        void drawLabyrinth(svg::SVGFile& file, vector<vector<Cell*>> shortestPaths = {}) {
+        virtual void drawLabyrinth(svg::SVGFile& file, vector<vector<Cell*>> shortestPaths = {}) {
             using namespace svg;
             unsigned rows = m_cells.size();
             unsigned columns = 0;
@@ -268,22 +268,56 @@ namespace Labyrinth {
         }
     };
 
-    /*class LabyrinthStructure {
+    class TriangleGraph : Graph {
     public:
-        virtual Box& getBox(int x, int y, int z) = 0;
-        //TODO virtual void drawStructure(svg::SVGFile& file) = 0;
-    };*/
+        explicit TriangleGraph(unsigned size) {
+            unsigned wall = 2*size*size;
 
-    /*class Labyrinth { //only square for now
-    public:
-        Labyrinth(unsigned X, unsigned Y, bool full = true) {
-            if (full) {
-                //_cells =
-                auto x = vector<Cell>(Y, vector<Cell>(X, {nullptr, nullptr, nullptr, nullptr}));
+            for (unsigned row = 0; row < size; ++row) {
+                m_cells.emplace_back();
+                for (unsigned col = 0; col < 2*row + 1; ++col) {
+                    m_cells.back().emplace_back(make_tuple(col, row, 0));
+                }
+            }
+
+            for (unsigned row = 0; row < size; ++row) {
+                for (unsigned col = 0; col < 2*row + 1; ++col) {
+                    if ((row != size-1) && (isEven(col))) { //add the neighbour below
+                        m_cells[row][col][0].m_out.emplace_back(m_cells[row+1][col+1][0]);
+                    }
+
+                    if (!isEven(col)) { //add the neighbour above
+                        m_cells[row][col][0].m_out.emplace_back(m_cells[row-1][col-1][0]);
+                    }
+
+                    if (col != 0) { //add left neighbour
+                        m_cells[row][col][0].m_out.emplace_back(m_cells[row][col-1][0]);
+                    }
+
+                    if (col != m_cells[row].size()-1) {
+                        m_cells[row][col][0].m_out.emplace_back(make_pair(m_cells[row][col+1][0], wall));
+                    }
+                }
             }
         }
+
+        void drawLabyrinth(svg::SVGFile &file, vector<vector<Cell *>> shortestPaths) override {
+            svg::Point A{file.m_width/2, 0.05*file.m_height};
+            svg::Point B{file.m_width/2 - 0.9*file.m_width/sqrt(3), 0.95*file.m_height};
+            svg::Point C{file.m_width/2 + 0.9*file.m_width/sqrt(3), 0.95*file.m_height};
+
+            double rowHeight = 0.9*file.m_height/m_cells.size();
+            double cellSize = 2*0.9*file.m_width/sqrt(3)/(m_cells.back().size());
+
+            //TODO finish
+        }
+
+        Cell &getCell(const Coords &c) override {
+            return m_cells[get<1>(c)][get<0>(c)][0];
+        }
+
     private:
-        vector<vector<Cell>> _cells;
-    };*/
+        bool isEven(unsigned num) {return (num % 2) == 0;}
+    };
 }
 #endif //IV112_TASKS_LABYRINTH_H
