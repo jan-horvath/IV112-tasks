@@ -9,9 +9,24 @@
 using namespace std;
 
 namespace Labyrinth {
-    typedef tuple<unsigned, unsigned, unsigned> Coords;
+    struct Coords {
+        unsigned X;
+        unsigned Y;
+        unsigned Z;
+
+        friend bool operator==(const Coords &lhs, const Coords &rhs) {
+            return lhs.X == rhs.X &&
+                   lhs.Y == rhs.Y &&
+                   lhs.Z == rhs.Z;
+        }
+
+        friend bool operator!=(const Coords &lhs, const Coords &rhs) {
+            return !(rhs == lhs);
+        }
+    };
+
     struct Cell {
-        Cell(Coords coords) : m_out(), m_idx(move(coords)), m_prev(), m_spl(0), m_processed(false) {}
+        Cell(Coords coords) : m_out(), m_idx(coords), m_prev(), m_spl(0), m_processed(false) {}
 
         vector<pair<Cell*, int>> m_out;
         unsigned m_value;
@@ -37,8 +52,8 @@ namespace Labyrinth {
                 for (unsigned i = p_shortestPath.size()-1; i > 0; --i) {
                     const Coords& A = p_shortestPath[i]->m_idx;
                     const Coords& B = p_shortestPath[i-1]->m_idx;
-                    cout << "[" << get<0>(A) << "," << get<1>(A) << "," << get<2>(A) << "] -> ["
-                                << get<0>(B) << "," << get<1>(B) << "," << get<2>(B) << "]" << endl;
+                    cout << "[" << A.X << "," << A.Y << "," << A.Z << "] -> ["
+                                << B.X << "," << B.Y << "," << B.Z << "]" << endl;
                 }
                 cout << endl;
                 p_shortestPath.pop_back();
@@ -143,8 +158,8 @@ namespace Labyrinth {
                     for (unsigned j = 1; j < shortestPaths[i].size(); ++j) {
                         Coords cA = shortestPaths[i][j-1]->m_idx;
                         Coords cB = shortestPaths[i][j]->m_idx;
-                        A = {leftX + (get<0>(cA) + 0.5)*cellSize, topY + (get<1>(cA) + 0.5)*cellSize};
-                        B = {leftX + (get<0>(cB) + 0.5)*cellSize, topY + (get<1>(cB) + 0.5)*cellSize};
+                        A = {leftX + (cA.X + 0.5)*cellSize, topY + (cA.Y + 0.5)*cellSize};
+                        B = {leftX + (cB.X + 0.5)*cellSize, topY + (cB.Y + 0.5)*cellSize};
                         file.addLine(A, B, COLORS[i+1]);
                     }
                 }
@@ -164,7 +179,7 @@ namespace Labyrinth {
             for (unsigned i = 0; i < data.size(); ++i) {
                 m_cells[i].resize(data[i].size());
                 for (unsigned j = 0; j < m_cells[i].size(); ++j) {
-                    m_cells[i][j].emplace_back(Cell(make_tuple(j,i,0)));
+                    m_cells[i][j].emplace_back(Cell({j,i,0}));
                 }
             }
 
@@ -195,7 +210,7 @@ namespace Labyrinth {
 
     protected:
         Cell& getCell(const Coords &c) override {
-            return m_cells[get<1>(c)][get<0>(c)][get<2>(c)];
+            return m_cells[c.Y][c.X][c.Z];
         }
     };
 
@@ -206,10 +221,10 @@ namespace Labyrinth {
             for (unsigned i = 0; i < data.size(); ++i) {
                 m_cells[i].resize(data[i].length());
                 for (unsigned j = 0; j < m_cells[i].size(); ++j) {
-                    m_cells[i][j].emplace_back(Cell(make_tuple(j,i,0)));
-                    m_cells[i][j].emplace_back(Cell(make_tuple(j,i,1)));
-                    m_cells[i][j].emplace_back(Cell(make_tuple(j,i,2)));
-                    m_cells[i][j].emplace_back(Cell(make_tuple(j,i,3)));
+                    m_cells[i][j].emplace_back(Cell({j,i,0}));
+                    m_cells[i][j].emplace_back(Cell({j,i,1}));
+                    m_cells[i][j].emplace_back(Cell({j,i,2}));
+                    m_cells[i][j].emplace_back(Cell({j,i,3}));
                 }
             }
 
@@ -255,7 +270,7 @@ namespace Labyrinth {
 
     protected:
         Cell &getCell(const Coords &c) override {
-            return m_cells[get<1>(c)][get<0>(c)][get<2>(c)];
+            return m_cells[c.Y][c.X][c.Z];
         }
 
     private:
@@ -275,45 +290,74 @@ namespace Labyrinth {
 
             for (unsigned row = 0; row < size; ++row) {
                 m_cells.emplace_back();
+                m_cells.back().resize(2*row + 1);
                 for (unsigned col = 0; col < 2*row + 1; ++col) {
-                    m_cells.back().emplace_back(make_tuple(col, row, 0));
+                    m_cells.back()[col].emplace_back(Cell({col, row, 0}));
                 }
             }
 
             for (unsigned row = 0; row < size; ++row) {
                 for (unsigned col = 0; col < 2*row + 1; ++col) {
                     if ((row != size-1) && (isEven(col))) { //add the neighbour below
-                        m_cells[row][col][0].m_out.emplace_back(m_cells[row+1][col+1][0]);
+                        m_cells[row][col][0].m_out.emplace_back(make_pair(&m_cells[row+1][col+1][0], wall));
                     }
 
                     if (!isEven(col)) { //add the neighbour above
-                        m_cells[row][col][0].m_out.emplace_back(m_cells[row-1][col-1][0]);
+                        m_cells[row][col][0].m_out.emplace_back(make_pair(&m_cells[row-1][col-1][0], wall));
                     }
 
                     if (col != 0) { //add left neighbour
-                        m_cells[row][col][0].m_out.emplace_back(m_cells[row][col-1][0]);
+                        m_cells[row][col][0].m_out.emplace_back(make_pair(&m_cells[row][col-1][0], wall));
                     }
 
                     if (col != m_cells[row].size()-1) {
-                        m_cells[row][col][0].m_out.emplace_back(make_pair(m_cells[row][col+1][0], wall));
+                        m_cells[row][col][0].m_out.emplace_back(make_pair(&m_cells[row][col+1][0], wall));
                     }
                 }
             }
         }
 
-        void drawLabyrinth(svg::SVGFile &file, vector<vector<Cell *>> shortestPaths) override {
-            svg::Point A{file.m_width/2, 0.05*file.m_height};
-            svg::Point B{file.m_width/2 - 0.9*file.m_width/sqrt(3), 0.95*file.m_height};
-            svg::Point C{file.m_width/2 + 0.9*file.m_width/sqrt(3), 0.95*file.m_height};
+        void drawLabyrinth(svg::SVGFile &file, vector<vector<Cell *>> shortestPaths = {}) override {
+            svg::Point A{file.m_width/2, 0.1*file.m_height}; //TODO make smaller
+            svg::Point B{file.m_width/2 - 0.8*file.m_width/sqrt(3), 0.9*file.m_height};
+            svg::Point C{file.m_width/2 + 0.8*file.m_width/sqrt(3), 0.9*file.m_height};
 
-            double rowHeight = 0.9*file.m_height/m_cells.size();
-            double cellSize = 2*0.9*file.m_width/sqrt(3)/(m_cells.back().size());
+            file.addLine(A,B);
+            file.addLine(B,C);
+            file.addLine(C,A);
 
-            //TODO finish
+            double rowHeight = 0.8*file.m_height/m_cells.size();
+            double cellSize = 2*0.8*file.m_width/sqrt(3)/(m_cells.back().size()/2 + 1);
+
+            for (unsigned row = 0; row < m_cells.size(); ++row) {
+                for (unsigned col = 0; col < 2 * row + 1; ++col) {
+                    for (const auto& edge : m_cells[row][col][0].m_out) {
+                        if (edge.second > 1) {
+                            const Coords &NC = edge.first->m_idx; //negihbour colors
+                            if (row == NC.Y) { assert(col == NC.X + 1 || NC.X == col + 1); } //TODO remove later
+                            if (row == NC.Y && NC.X == col + 1) { //edge on the right of current cell
+                                double PXcoef = -1.0 / 2 * row + (col + 1) / 2;
+                                double RXcoef = -1.0 / 2 * (row - 1) + col / 2;
+                                svg::Point P{file.m_width / 2 + PXcoef * cellSize,
+                                             0.1 * file.m_height + rowHeight * row};
+                                svg::Point R{file.m_width / 2 + RXcoef * cellSize,
+                                             0.1 * file.m_height + rowHeight * (row + 1)};
+                                file.addLine(P, R);
+                            }
+                            if (row + 1 == NC.Y && col + 1 == NC.X) {
+                                double Xcoef = -1.0/2 * (row+1) + col/2;
+                                svg::Point P{file.m_width / 2 + Xcoef * cellSize, 0.1 * file.m_height + rowHeight * (row+1)};
+                                svg::Point R{file.m_width / 2 + (Xcoef+1) * cellSize, 0.1 * file.m_height + rowHeight * (row+1)};
+                                file.addLine(P,R);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         Cell &getCell(const Coords &c) override {
-            return m_cells[get<1>(c)][get<0>(c)][0];
+            return m_cells[c.Y][c.X][0];
         }
 
     private:
