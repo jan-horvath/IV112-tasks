@@ -29,17 +29,17 @@ vector<vector<unsigned>> getNumGraphFromFile(const string& filename) {
 }
 
 int main() {
-    /*auto output = getNumGraphFromFile("ciselne-bludiste3.txt");
-    NumberedGraph ng1(output);*/
-    //ng1.Dijkstra(make_tuple(0,0,0), make_tuple(4,4,0));
+    /*auto output = getNumGraphFromFile("ciselne-bludisteT.txt");
+    NumberedGraph ng1(output);
+    ng1.Dijkstra({0,0,0}, {9,9,0});*/
 
     SVGFile file("robot_graph1.svg", 1000, 1000);
     RobotGraph rg({
         //" #  ",
         //"   "
         "     ",
-        " ###   ",
-        "  ##    ",
+        " ###  #",
+        "  ##   #",
         "#  #   ",
         "##   "
     });

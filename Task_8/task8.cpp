@@ -161,15 +161,20 @@ int main() {
     }*/
 
     SVGFile fileFern("MRCM-Fern.svg", 1000, 1000);
+
     cv::Mat fern(1000, 1000, CV_16UC3, WHITE);
+
     Object arrow= createArrow(0.2, 0.4, 0.5, 0.5);
+
     vector<Matrix> transformations;
     transformations.emplace_back(Matrix({0.849, 0.037, 0.075, -0.037, 0.849, 0.183, 0, 0, 1},3,3));
     transformations.emplace_back(Matrix({0.197, -0.226, 0.4, 0.226, 0.197, 0.049, 0, 0, 1}, 3, 3));
     transformations.emplace_back(Matrix({-0.15, 0.283, 0.575, 0.26, 0.237, 0.084, 0, 0, 1}, 3, 3));
     transformations.emplace_back(Matrix({0, 0, 0.5, 0, 0.16, 0, 0, 0, 1}, 3, 3));
-    //MRCM(fileFern, arrow, transformations, 7);
-    approximatedInfiniteMRCM(fern, transformations, 50000000);
+
+    MRCM(fileFern, arrow, transformations, 7);
+
+    approximatedInfiniteMRCM(fern, transformations, 5000000);
     cv::imwrite("MRCM-Fern.png", fern);
     return 0;
 }

@@ -4,6 +4,7 @@
 #include <vector>
 #include <tuple>
 #include <queue>
+#include <random>
 #include "framework.hpp"
 
 using namespace std;
@@ -67,8 +68,7 @@ namespace Labyrinth {
         }
     public:
         vector<vector<Cell*>> Dijkstra(const Coords& p_from, const Coords& p_to) {
-            //priority_queue<Cell*, vector<Cell*>, decltype(&hasGreaterSpl)> pq(hasGreaterSpl);
-            vector<Cell*> pq;
+            vector<Cell*> pq; //priority queue
             unsigned umaxhalf = numeric_limits<unsigned>::max()/2;
 
             for (auto& row : m_cells) {
@@ -77,7 +77,6 @@ namespace Labyrinth {
                         cell.m_spl = umaxhalf;
                         cell.m_prev.clear();
                         cell.m_processed = false;
-                        //pq.push_(&cell);
                         pq.push_back(&cell);
                     }
                 }
@@ -90,26 +89,20 @@ namespace Labyrinth {
             pq.pop_back();
 
             while (current->m_idx != p_to) {
-                //if (!current->m_processed) {
                 for (const auto &edge : current->m_out) {
                     if (edge.first->m_spl == current->m_spl + edge.second) {
                         edge.first->m_prev.push_back(current);
                     }
 
-                    if (edge.first->m_spl > current->m_spl + edge.second) {
+                    if (edge.first->m_spl > current->m_spl + edge.second) {//decrease-key
                         edge.first->m_spl = current->m_spl + edge.second;
                         edge.first->m_prev.clear();
                         edge.first->m_prev.push_back(current);
-                        //pq.push(edge.first); //insted of decrease-key we add the pointer again but with new m_spl value
                         make_heap(pq.begin(), pq.end(), &hasGreaterSpl);
                     }
                 }
 
-                //}
-                //current->m_processed = true;
-                //current = pq.top(); //extract min (look at min item)
                 current = pq.front();
-                //pq.pop(); //remove the min item
                 pop_heap(pq.begin(), pq.end(), &hasGreaterSpl);
                 pq.pop_back();
 
@@ -317,6 +310,32 @@ namespace Labyrinth {
             }
         }
 
+        void generateLabyrinth() {
+            stack<Cell*> S;
+            S.push(&m_cells[m_cells.size()/2][m_cells[m_cells.size()/2].size()/2][0]);
+            S.top()->m_processed = true;
+
+            while (!S.empty()) {
+                pair<Cell*, int>* next = getNextNeighbour(S.top());
+
+                if (next == nullptr) {
+                    S.pop();
+                } else {
+                    next->second = 1;
+                    next->first->m_processed = true;
+                    unsigned control = 0;
+                    for (auto& edge : next->first->m_out) {
+                        if (edge.first == S.top()) {
+                            edge.second = 1;
+                            control++;
+                        }
+                    }
+                    assert(control == 1);
+                    S.push(next->first);
+                }
+            }
+        }
+
         void drawLabyrinth(svg::SVGFile &file, vector<vector<Cell *>> shortestPaths = {}) override {
             svg::Point A{file.m_width/2, 0.1*file.m_height}; //TODO make smaller
             svg::Point B{file.m_width/2 - 0.8*file.m_width/sqrt(3), 0.9*file.m_height};
@@ -361,6 +380,24 @@ namespace Labyrinth {
         }
 
     private:
+        pair<Cell*, int>* getNextNeighbour(Cell* c) const {
+            std::random_device rd;
+            std::mt19937 g(rd());
+            vector<unsigned> indices(c->m_out.size());
+            iota(indices.begin(), indices.end(), 0);
+            shuffle(indices.begin(), indices.end(), g);
+
+            pair<Cell*, int>* next = nullptr;
+
+            for (unsigned i : indices) {
+                if (!c->m_out[i].first->m_processed) {
+                    next = &c->m_out[i];
+                    break;
+                }
+            }
+            return next;
+        }
+
         bool isEven(unsigned num) {return (num % 2) == 0;}
     };
 }
